@@ -1,0 +1,80 @@
+[
+ {
+  "name": "O1_obstructed_triangle",
+  "description": "pair stalks {12} (CI: rho12=0), {13}, {23}; family assigns rho13=rho23=0.9; matched unit margins. Any joint law would need correlation matrix with rho12=0, rho13=rho23=0.9, which is not PSD.",
+  "correlation_matrix": [
+   [
+    1.0,
+    0.0,
+    0.9
+   ],
+   [
+    0.0,
+    1.0,
+    0.9
+   ],
+   [
+    0.9,
+    0.9,
+    1.0
+   ]
+  ],
+  "min_eigenvalue": -0.2727922061357856,
+  "determinant": -0.6200000000000001,
+  "global_section_exists": false,
+  "status": "OBSTRUCTED",
+  "witness_type": "PSD-certificate"
+ },
+ {
+  "name": "O2_feasible_control",
+  "description": "same poset and CI constraint, moderate correlations: glues",
+  "correlation_matrix": [
+   [
+    1.0,
+    0.0,
+    0.5
+   ],
+   [
+    0.0,
+    1.0,
+    0.5
+   ],
+   [
+    0.5,
+    0.5,
+    1.0
+   ]
+  ],
+  "min_eigenvalue": 0.2928932188134525,
+  "determinant": 0.5,
+  "global_section_exists": true,
+  "status": "GLUES",
+  "witness_type": "explicit-glue"
+ },
+ {
+  "name": "O3_boundary_case",
+  "description": "rho13=rho23=-0.7071, rho12=0: determinant exactly zero boundary",
+  "correlation_matrix": [
+   [
+    1.0,
+    0.0,
+    -0.7071067811865476
+   ],
+   [
+    0.0,
+    1.0,
+    -0.7071067811865476
+   ],
+   [
+    -0.7071067811865476,
+    -0.7071067811865476,
+    1.0
+   ]
+  ],
+  "min_eigenvalue": -9.405069831707165e-17,
+  "determinant": -2.2204460492503185e-16,
+  "global_section_exists": true,
+  "status": "BOUNDARY",
+  "witness_type": "explicit-glue"
+ }
+]

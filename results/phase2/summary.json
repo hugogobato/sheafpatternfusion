@@ -1,0 +1,145 @@
+{
+ "n_rows": 3394,
+ "n_decidable_gt": 1202,
+ "n_undecided_gt": 2192,
+ "undecided_rate": 0.6458456098998232,
+ "ALL": {
+  "rows": 3394,
+  "decidable": 1202,
+  "confusion": {
+   "TP": 865,
+   "TN": 337,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "MCAR": {
+  "rows": 20,
+  "decidable": 20,
+  "confusion": {
+   "TP": 20,
+   "TN": 0,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "MAR": {
+  "rows": 0,
+  "decidable": 0,
+  "confusion": {
+   "TP": 0,
+   "TN": 0,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 0.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "MNAR_self": {
+  "rows": 3002,
+  "decidable": 991,
+  "confusion": {
+   "TP": 654,
+   "TN": 337,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "MNAR_other": {
+  "rows": 372,
+  "decidable": 191,
+  "confusion": {
+   "TP": 191,
+   "TN": 0,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "acyclic_poset": {
+  "rows": 3394,
+  "decidable": 1202,
+  "confusion": {
+   "TP": 865,
+   "TN": 337,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "cyclic_poset": {
+  "rows": 0,
+  "decidable": 0,
+  "confusion": {
+   "TP": 0,
+   "TN": 0,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 0.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "n_vars=2": {
+  "rows": 182,
+  "decidable": 120,
+  "confusion": {
+   "TP": 72,
+   "TN": 48,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "n_vars=3": {
+  "rows": 2812,
+  "decidable": 1001,
+  "confusion": {
+   "TP": 725,
+   "TN": 276,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "n_vars=4": {
+  "rows": 400,
+  "decidable": 81,
+  "confusion": {
+   "TP": 68,
+   "TN": 13,
+   "FP": 0,
+   "FN": 0
+  },
+  "agreement_rate": 1.0,
+  "unexplained_mismatch_rate": 0.0
+ },
+ "engine_undecided_x_sheaf": {
+  "RECOVERABLE": 2191,
+  "UNRECOVERABLE": 1
+ },
+ "engine_undecided_jacobian_full_rank": 0.8508211678832117,
+ "decidable_jacobian_full_rank_rate": 0.5732113144758736,
+ "habitat_nonempty_cells": 831,
+ "habitat_crossing": {
+  "conflict=1|RECOVERABLE": 831,
+  "conflict=1|UNRECOVERABLE": 319,
+  "conflict=0|RECOVERABLE": 34,
+  "conflict=0|UNRECOVERABLE": 18
+ },
+ "gate_metrics": {
+  "G3a_agreement_overall": 1.0,
+  "G3a_unexplained_overall": 0.0,
+  "threshold_agreement_min": 0.98,
+  "threshold_unexplained_max": 0.02
+ }
+}

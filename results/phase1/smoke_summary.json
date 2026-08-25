@@ -1,0 +1,15 @@
+{
+ "bank_rows": 11,
+ "engine_vs_expected_agreement": "11/11",
+ "sheaf_vs_expected_agreement": "11/11",
+ "min_slice_validity_rate": 1.0,
+ "mcar_section_detection": {
+  "x1_mcar_joint": 1.0
+ },
+ "hazardA_passed": "200/200",
+ "obstructions": {
+  "O1_obstructed_triangle": false,
+  "O2_feasible_control": true,
+  "O3_boundary_case": true
+ }
+}

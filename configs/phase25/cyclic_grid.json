@@ -1,0 +1,35 @@
+{
+  "description": "WP2.5.4 forced cyclic-poset stratum grid. Frozen before any Phase-2.5 run. Engine/fiber budgets identical to configs/phase2/grid.json; only the stratum construction is new.",
+  "shards": 4,
+  "target_per_shard": 140,
+  "honest_attempt_floor_total": 200,
+  "max_attempts": 40000,
+  "seed_base": 20350901,
+  "proposal_mix": {
+    "triangle_n3": 0.45,
+    "square_n4": 0.25,
+    "rejection_n3": 0.20,
+    "rejection_n4": 0.10
+  },
+  "budgets": {
+    "witness_starts": 24,
+    "jump_starts": 40,
+    "fiber_starts": 48,
+    "max_roots": 12,
+    "undecided_round2_multiplier": 2,
+    "lp_pinch_tol": 1e-9,
+    "lp_width_tol": 1e-3,
+    "spread_tol": 1e-6
+  },
+  "ci_discovery_draws": 16,
+  "seeds": {
+    "draw_seed_base": 20360901
+  },
+  "pre_registered_gates": {
+    "within_stratum_agreement_min": 0.98,
+    "obstruction_signature_bounds": "(0.0, 1.0) exclusive",
+    "kill_rule_1": "unexplained mismatches > 2% after one debug round -> C1/C2 dead as claimed",
+    "kill_rule_2": "uniformly degenerate obstruction signature -> strip cohomology vocabulary, retitle exhaustive-small-poset claim"
+  },
+  "outputs": ["results/phase25/cyclic_instances.jsonl", "results/phase25/cyclic_summary.json"]
+}

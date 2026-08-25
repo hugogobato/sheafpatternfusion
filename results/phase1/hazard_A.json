@@ -1,0 +1,193 @@
+{
+ "trials": 200,
+ "passed": 200,
+ "claim": "linear mean-coordinate sheaf: every consistent family glues (constructive H^1 = 0); obstruction content requires richer stalks",
+ "details": [
+  {
+   "trial": 0,
+   "patterns": [
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "radius": 1.3710242980056706e-15,
+   "glued": true
+  },
+  {
+   "trial": 1,
+   "patterns": [
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "radius": 6.707437923744493e-16,
+   "glued": true
+  },
+  {
+   "trial": 2,
+   "patterns": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "radius": 0.0,
+   "glued": true
+  },
+  {
+   "trial": 3,
+   "patterns": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "radius": 0.0,
+   "glued": true
+  },
+  {
+   "trial": 4,
+   "patterns": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "radius": 0.0,
+   "glued": true
+  },
+  {
+   "trial": 5,
+   "patterns": [
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "radius": 4.2998752849492583e-16,
+   "glued": true
+  },
+  {
+   "trial": 6,
+   "patterns": [
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "radius": 5.438959822042073e-16,
+   "glued": true
+  },
+  {
+   "trial": 7,
+   "patterns": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "radius": 0.0,
+   "glued": true
+  },
+  {
+   "trial": 8,
+   "patterns": [
+    [
+     0,
+     0,
+     1
+    ],
+    [
+     0,
+     1,
+     1
+    ],
+    [
+     1,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     0
+    ]
+   ],
+   "radius": 1.6946818973100072e-15,
+   "glued": true
+  },
+  {
+   "trial": 9,
+   "patterns": [
+    [
+     0,
+     1,
+     1
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "radius": 8.455206652451151e-16,
+   "glued": true
+  }
+ ]
+}

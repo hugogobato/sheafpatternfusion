@@ -1,0 +1,19 @@
+{
+  "description": "WP2.5.3 discordant-family configuration. Structure frozen at the seed n3_s03759_d0 (var_parents {0:[],1:[0],2:[0,1]}; r_parents [[1],[0,2],[0,1,2]]); members are fresh mechanism draws.",
+  "seed_instance_id": "n3_s03759_d0",
+  "target_var": 0,
+  "n_members": 120,
+  "draw_seed_base": 20270901,
+  "sampler_seed": 5150,
+  "engine_jump_starts": 40,
+  "engine_jump_starts_r2": 90,
+  "member_root_starts": 200,
+  "member_max_roots": 16,
+  "member_walk_follows": 4,
+  "member_walk_n_seeds": 10,
+  "member_walk_steps": 60,
+  "phi_tol": 0.0001,
+  "dist_tol": 1e-9,
+  "success_threshold": 10,
+  "outputs": ["results/phase25/discordant_family.jsonl", "docs/discordant_family.md"]
+}
