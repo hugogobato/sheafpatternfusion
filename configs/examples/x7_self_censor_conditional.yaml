@@ -1,0 +1,31 @@
+instance_id: x7_self_censor_conditional
+description: 'Same graph as x4/x5 but target is P(V1|V2): recoverable because R2 indep.
+  V1 given V2 (query-dependence showcase)'
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1':
+  - 1
+seed: 107
+fixed_cpt:
+- node: 0
+  kind: r
+  parents: []
+  p: 1.0
+targets:
+- type: cond
+  y_index: 0
+  y_value: 1
+  x_indices:
+  - 1
+  x_values:
+  - 0
+  formula: cond_sel_stratum
+  expected: RECOVERABLE
+provenance: Query-dependence emphasis in Mohan-Pearl JASA 2021; conditional-invariance
+  argument standard
+label_confidence: high

@@ -1,0 +1,26 @@
+instance_id: x4_self_censor_mean
+description: 'Self-censoring MNAR: R2 <- V1,V2 with self-edge; E[V2] NOT recoverable'
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1':
+  - 0
+  - 1
+seed: 104
+fixed_cpt:
+- node: 0
+  kind: r
+  parents: []
+  p: 1.0
+targets:
+- type: mean
+  index: 1
+  formula: null
+  expected: UNRECOVERABLE
+provenance: MNAR self-censoring negative (Rubin 1976 discussion; Mohan-Pearl JASA
+  2021 examples); principle-level
+label_confidence: high

@@ -1,0 +1,35 @@
+instance_id: x5_conditional_dies_with_self_selection
+description: 'Same graph as x4 (R2<-V1,V2, V1 always observed) but target is the conditional
+  P(V1=1|V2=0): NOT recoverable because within-stratum selection depends on V1 itself.
+  Contrast with x7 where removing the self-edge makes the analogous conditional recoverable.'
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1':
+  - 0
+  - 1
+seed: 109
+fixed_cpt:
+- node: 0
+  kind: r
+  parents: []
+  p: 1.0
+targets:
+- type: cond
+  y_index: 0
+  y_value: 1
+  x_indices:
+  - 1
+  x_values:
+  - 0
+  formula: null
+  expected: UNRECOVERABLE
+provenance: 'Query-dependence negative; Mohan-Pearl JASA 2021 emphasize recoverability
+  is query-specific; principle-level. HISTORY: slot x5 originally held two mislabeled
+  negatives (see smoke report); both were caught by the WP1.2 engines, which is the
+  point of WP1.2.'
+label_confidence: high

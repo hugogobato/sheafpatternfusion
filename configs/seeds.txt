@@ -1,0 +1,9 @@
+# Frozen seed registry (per plan Section 8: seed lists frozen per phase)
+# Phase 1: bank instance seeds live in configs/examples/*.yaml ("seed:" fields);
+#          smoke runner master seed 20260824 (scripts/run_smoke.py).
+# Phase 2: structure/draw seeds per configs/phase2/grid.json "seeds" block:
+#   n3 structure sampling   20260901
+#   n4 structure sampling   20260907
+#   parameter draws         20270901 (+ draw index)
+#   poset obstruction scans 20280901
+#   content scan battery    20290901

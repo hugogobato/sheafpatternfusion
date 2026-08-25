@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sheafpatternfusion"
+version = "0.2.0"
+description = "Sheaf-theoretic tools for missingness-pattern fusion."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy==2.4.3",
+    "scipy==1.17.1",
+    "pyyaml==6.0.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,25 @@
+instance_id: x6_anchor_under_mnar
+description: V1 always observed while V2 is self-censored; E[V1] remains trivially
+  identified (sanity anchor)
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1':
+  - 1
+seed: 106
+fixed_cpt:
+- node: 0
+  kind: r
+  parents: []
+  p: 1.0
+targets:
+- type: mean
+  index: 0
+  formula: anchor_direct
+  expected: RECOVERABLE
+provenance: Trivial direct observation; guards against false negatives in engines
+label_confidence: high

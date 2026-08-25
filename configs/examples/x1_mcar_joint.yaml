@@ -1,0 +1,31 @@
+instance_id: x1_mcar_joint
+description: MCAR both indicators independent of everything; joint/marginals of (V1,V2)
+  recoverable from any pattern
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1': []
+seed: 101
+fixed_cpt: []
+targets:
+- type: mean
+  index: 0
+  formula: mcar_cross_pattern_agreement
+  expected: RECOVERABLE
+- type: mean
+  index: 1
+  formula: mcar_cross_pattern_agreement
+  expected: RECOVERABLE
+- type: cell
+  cell:
+  - 1
+  - 1
+  formula: direct_full_pattern
+  expected: RECOVERABLE
+provenance: Rubin 1976 MCAR definition + MPT13 Prop. (MCAR => observed margins equal
+  full margins); principle-level transcription, figure-level pending full-text pass
+label_confidence: high

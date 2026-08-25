@@ -1,0 +1,26 @@
+instance_id: x3_mar_joint
+description: Same MAR graph as x2; the joint P(V1,V2) is recoverable by composition
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1':
+  - 0
+seed: 103
+fixed_cpt:
+- node: 0
+  kind: r
+  parents: []
+  p: 1.0
+targets:
+- type: cell
+  cell:
+  - 1
+  - 1
+  formula: mar_joint_product
+  expected: RECOVERABLE
+provenance: Corollary of MAR stratum identification; MP-JASA-2021 Sec. on MAR
+label_confidence: high

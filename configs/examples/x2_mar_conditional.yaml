@@ -1,0 +1,35 @@
+instance_id: x2_mar_conditional
+description: V1 always observed; R2 <- V1 (MAR). Conditional and mean of V2 identified
+  within strata of V1
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0': []
+  '1':
+  - 0
+seed: 102
+fixed_cpt:
+- node: 0
+  kind: r
+  parents: []
+  p: 1.0
+targets:
+- type: cond
+  y_index: 1
+  y_value: 1
+  x_indices:
+  - 0
+  x_values:
+  - 1
+  formula: mar_cond_stratum
+  expected: RECOVERABLE
+- type: mean
+  index: 1
+  formula: mar_mean_iterated
+  expected: RECOVERABLE
+provenance: Standard MAR identification (Rubin 1976; MPT13/JASA21 MAR discussion);
+  theorem-level
+label_confidence: high

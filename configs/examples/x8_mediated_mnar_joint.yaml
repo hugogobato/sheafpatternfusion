@@ -1,0 +1,29 @@
+instance_id: x8_mediated_mnar_joint
+description: 'Mediated MNAR: V1->V2; R1<-V2 (missingness driven by a partially missing
+  mediator); R2<-{V1,V2}. Joint cell P(1,1) NOT recoverable.'
+n_vars: 2
+var_parents:
+  '0': []
+  '1':
+  - 0
+r_parents:
+  '0':
+  - 1
+  '1':
+  - 0
+  - 1
+seed: 108
+fixed_cpt: []
+targets:
+- type: cell
+  cell:
+  - 1
+  - 1
+  formula: null
+  expected: UNRECOVERABLE
+provenance: 'Nonignorable missingness propagating through partially-missing variables
+  (dropout-chain principle; MP21 non-MNAR discussion); principle-level, engine-confirmed.
+  HISTORY: slot x8 originally held mutual selection R1<-V2,R2<-V1 whose joint turned
+  out IDENTIFIED once pattern probabilities entered the observable fingerprint - caught
+  during WP1.4; see smoke report.'
+label_confidence: high

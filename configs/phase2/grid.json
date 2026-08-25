@@ -1,0 +1,33 @@
+{
+  "description": "Phase 2 enumeration grid (WP2.1). Frozen 2026-08-24 after pilot timing.",
+  "n2": {"mode": "exhaustive", "draws_per_structure": 2},
+  "n3": {"mode": "stratified_random", "sampled_structures": 1400, "draws_per_structure": 1},
+  "n4": {"mode": "random", "sampled_structures": 200, "draws_per_structure": 1},
+  "named_classes": {"draws_per_structure": 3},
+  "budgets": {
+    "witness_starts": 24,
+    "jump_starts": 40,
+    "fiber_starts": 48,
+    "max_roots": 12,
+    "undecided_round2_multiplier": 2,
+    "lp_pinch_tol": 1e-9,
+    "lp_width_tol": 1e-3,
+    "spread_tol": 1e-6
+  },
+  "ci_discovery_draws": 16,
+  "poset_scan_families": 30,
+  "section_check_draws": 4,
+  "seeds": {
+    "structure_seed_base_n3": 20260901,
+    "structure_seed_base_n4": 20260907,
+    "draw_seed_base": 20270901,
+    "poset_scan_seed": 20280901,
+    "content_scan_seed": 20290901
+  },
+  "compute": {
+    "workers": 6,
+    "blas_threads_per_worker": 1,
+    "projected_rows": 2900,
+    "pilot_wall_per_row_s": null
+  }
+}
