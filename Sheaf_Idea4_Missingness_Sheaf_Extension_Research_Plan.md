@@ -116,12 +116,13 @@ Searches run today (arXiv API): `"sheaf" AND "missing data"` (2 hits, inspected 
 ```text
 P1 De-risk & enable (G0 validity, G1 novelty, G2 implementability)      [ACTIVE]
    -> P2 Enumeration falsification of C1/C2 (G3a)                       [ACTIVE after P1]
-   -> P3 Fusion benchmark C3 (G3b)                                      [ACTIVE after P1; parallel-safe with P2]
+      -> P2.5 Independent validation battery C1/C2 (G2.5a-d)            [ACTIVE after P2; parallel-safe with P3]
+   -> P3 Fusion benchmark C3 (G3b)                                      [ACTIVE after P1; parallel-safe with P2/P2.5]
         -> P4 Diagnosis C4 + scaling + real-data smoke (G3c, G4a)       [ACTIVE after P3]
              -> P5 Evidence-earned theory + paper (G5, G6)              [DORMANT UNTIL P4 gate]
 ```
 
-Parallelism note: P2 (representation theory falsification) and P3 (estimation benchmark) consume disjoint Phase 1 outputs and kill independently; running them concurrently wastes nothing if either dies. P4 waits on P3 (diagnosis is only worth building around a surviving estimator) and uses P2's obstruction findings as framing only.
+Parallelism note: P2 (representation theory falsification) and P3 (estimation benchmark) consume disjoint Phase 1 outputs and kill independently; running them concurrently wastes nothing if either dies. P2.5 validates the certificate with non-shared oracles only and shares no code path with P3, so it gates framing and demotion, never the estimator race. P4 waits on P3 (diagnosis is only worth building around a surviving estimator) and uses P2/P2.5 findings as framing only.
 
 ---
 
@@ -207,6 +208,57 @@ Parallelism note: P2 (representation theory falsification) and P3 (estimation be
 4. LP ground truth exceeds feasible compute: scope honestly to tractable classes (monotone first) and say so; shard to Colab (anticipated; see Section 11).
 
 Compute: the LP engine is the first heavy job. Pilot locally; projected total 20-80 CPU-hours -> **Colab sharding triggered** (est. 12-20 notebooks).
+
+---
+
+### Phase 2.5: Independent validation battery for C1/C2 (target: ~1 week calendar; runs parallel with Phase 3 start)
+
+**Purpose and scientific question.** Phase 2 closed (2026-08-25) with a formal G3a PASS that an adversarial read reduces to implementation-consistency evidence: agreement was exactly 100%, but only on the 1202/3394 (35.4%) rows where the brute-force engine decided; the engine was UNDETERMINED on 64.6% of rows, and there the sheaf instrument asserted RECOVERABLE on 2191/2192 rows with no independent check. Because both instruments search the same fingerprint manifold, that mass is currently statistically indistinguishable from the free policy "always say RECOVERABLE." The main grid additionally produced ZERO cyclic realized-pattern posets, so the exhaustive-small-poset framing was never stressed by its own experiment, and the hand-built side obstructions re-derive classical phenomena (Frechet-Hoeffding bounds, PSD completion). Phase 2.5 therefore prices the certificate's marginal information using NON-SHARED oracles only, forces the cyclic stratum into existence, sizes the audit statistics honestly, and prices compute. Gates G2.5a-d. This phase exists because a false RECOVERABLE is actionable and kills C1 outright, while UNDETERMINED merely invites caution; validation effort must be allocated accordingly.
+
+**Prerequisites.** Phase 2 merged artifacts frozen (`results/phase2/instances_merged.jsonl`, 3394/3394 rows, `COLLECT_REPORT.json` all-zero anomalies); library tag `v0.3.0` containing the battery modules below; the frozen merge committed to the repository (`data/frozen/instances_merged.jsonl`) so Colab runners self-fetch their sampling frames at pinned tag instead of relying on manual uploads.
+
+#### WP2.5.1 Degeneracy null battery (CPU-light; 1 notebook)
+- Population: all 2192 UNDETERMINED rows of `instances_merged.jsonl`. Null policies scored against the certificate's labels: (N0) constant RECOVERABLE; (N1) fraction-observed threshold sweep; (N2) pattern-overlap density; (N3) Frechet-width sign on the target mean interval (wide interval -> predict UNRECOVERABLE); (N4) constant UNRECOVERABLE control. Stratified by n in {2,3,4}.
+- Pre-registered expectation and reading: N0 will reproduce >= 99.9% of labels by construction (the certificate is almost-all-RECOVERABLE there), so the headline metric is NOT raw agreement but the DISAGREEMENT SET: every row where the certificate contradicts the best null (chiefly N3) defines the priority sample S* for WP2.5.2. If S* is empty AND WP2.5.2 finds no false positives AND WP2.5.3 collapses, the certificate has demonstrated exactly zero marginal information in its claimed value region and C1/C2 demote to motivation-only (rule D1).
+- Outputs: `results/phase25/null_battery.{json,csv}`, priority sample `results/phase25/priority_sample.jsonl`.
+
+#### WP2.5.2 Adversarial audit of RECOVERABLE assertions (main compute; 6 Colab shards)
+- Sampling frame and design (pre-registered): census of UNDETERMINED x RECOVERABLE rows at n=2 (all 62), census at n=4 (all 319), simple random sample N=400 at n=3, plus census of the priority set S* from WP2.5.1. Zero errors on a stratum of size M bounds its false-RECOVERABLE rate by 3/M (Chernyuk-style rule of three); with M >= 300 everywhere the pooled upper bound is <= 1%. Any CONFIRMED false RECOVERABLE anywhere -> C1 KILL (rule D2); this asymmetric tolerance is deliberate.
+- Attackers must not reuse the fingerprint manifold: (A1) deepened witness search at x20 Phase 2 budgets (restarts, jump horizons, randomized objectives) hunting a model pair that differs on the target while matching observed laws; (A2) exact rational vertex/completion enumeration plus independent constructive completion samplers at fresh seeds, testing whether two completions disagree on the target; (A3) for the discrete layer, direct Frechet-cell certification on every triple of patterns adjacent through the target variable (classical route, deliberately non-sheaf).
+- Every verdict logged with attacker identity, budget, and wall time (feeds WP2.5.6). Outputs: `results/phase25/audit_sample.jsonl`, `audit_verdicts.jsonl`.
+
+#### WP2.5.3 Discordant-family construction (CPU-light; 1 notebook)
+- Seed: the single observed instrument divergence `n3_s03759_d0` / target mean(0) (engine UNDETERMINED_RELAXED_FRAGILE; sheaf UNRECOVERABLE; observed family LP-incompletable, max cross-pattern gap 0.283; Jacobian rank 20/21). Parametrize its structure class and mechanism draw to grow a family; each member must carry BOTH (i) two distinct completions differing on the target, found by the independent samplers of WP2.5.2/A2, AND (ii) a classical witness where applicable (explicit Frechet-cell violation or LP dual infeasibility certificate).
+- Success: >= 10 witnessed members -> the theory-note path greenlights post-adjudication (this becomes the demonstration that the certificate flags incompletability the engine cannot decide). Collapse to the singleton seed -> recorded as negative; weakens the theory path and strengthens demotion (feeds rule D1).
+- Output: `results/phase25/discordant_family.jsonl`, `docs/discordant_family.md`.
+
+#### WP2.5.4 Forced cyclic-poset stratum (Colab; 4 shards)
+- The Phase 2 sampler never realized a cyclic `poset_shape`, so build the missing stratum directly: rejection-sample m-graph structures until the realized pattern poset is cyclic, seeded additionally by hand-constructed overlapping-pattern families known to induce cycles on 3-4 variables. Target >= 500 instances achieving cyclic realized posets (pilot-gated; honest-attempt floor 50, else rule D4).
+- Run the identical Phase 2 pipeline (same engine budgets, same seed protocol) restricted to this stratum. Pre-registered: agreement >= 98% within-stratum, and nonzero obstruction signature fraction strictly inside (0%, 100%), finally exercising the WP2.2 degeneracy check that the main grid skipped.
+- Kill rules scoped to this stratum mirror Phase 2 rules 1-2: unexplained mismatches > 2% after one debug round -> C1/C2 dead as claimed; uniformly degenerate obstruction signature -> cohomology vocabulary stripped and "exhaustive small-poset" retitled.
+- Outputs: `configs/phase25/cyclic_grid.json`, `results/phase25/cyclic_instances.jsonl`, `results/phase25/cyclic_summary.json`.
+
+#### WP2.5.5 Equivalence/inclusion memo (desk work, parallel; no compute)
+- Prove or refute, on the binary m-graph class of Phase 2: fiber-spread-zero iff LP-width-zero wherever the engine decides (both directions). An equivalence theorem converts the shared-manifold circularity into mathematics (agreement stops being surprising and starts being a lemma); a proven divergence case is a novelty seed feeding WP2.5.3. Either resolution is publishable material; agnosticism is not.
+- Source mapping (foundations to lean on): Frechet 1951 and Hoeffding 1940 for the pairwise marginal bound geometry; Grone et al. 1984 for positive-definite completion as the Gaussian-layer analogue whose obstruction theory the sheaf layer must reproduce or exceed; Manski 2003 for partial-identification bounds semantics; Daniel et al. 2012 and Mohan-Pearl 2013/2021 for the m-graph recoverability lineage the certificate claims to compress; Robinson 2018 for the assignment-sheaf consistency filtration the fiber instrument instantiates; Cheesman et al. 1991 cited ONLY as the cautionary analogy for why the 66->36->20% decidability collapse must NOT be narrated as a phase transition without a hardness parameter (three points on one engine's budget curve is an observation about the engine until proven otherwise).
+
+#### WP2.5.6 Compute pricing (piggybacks on WP2.5.2 logs)
+- Certificate cost per row vs deep-witness route per row, medians by n. Triage rationale requires the certificate >= 10x cheaper than the search it spares; otherwise the applied story dies even if the mathematics lives (recorded in the gate memo regardless of G2.5b).
+
+**Gates and consequences (pre-registered).**
+- G2.5a (degeneracy): quantified always; demotion trigger is the joint condition in WP2.5.1/D1, not raw agreement.
+- G2.5b (audit): zero confirmed false RECOVERABLE across censused and sampled strata -> C1 survives with a defensible error-rate bound; any confirmation -> C1 KILL, program proceeds methods-only on C3 (per Phase 3 default) with the audit published as the boundary marker.
+- G2.5c (cyclic stratum): agreement >= 98% AND non-degenerate obstructions -> C2 keeps H^1 vocabulary and the "small-poset" title earns back its meaning; otherwise strip per D4.
+- G2.5d (family): >= 10 witnessed discordant members -> standalone theory note authorized AFTER G2.5b returns clean; fewer -> fold into limitations.
+- Interaction with Phase 3: Phase 3 starts NOW in parallel (it shares no code path with the certificate, so none of this gates it); Phase 2.5 outcomes only change framing, demotion, and the theory annex. If Phase 3 later hits its KILL default, a clean G2.5b+G2.5c+G2.5d is precisely the "live correspondence contribution" that overrides the default.
+
+**Give-up/demotion rules (Phase 2.5).**
+1. D1 (demotion): S* empty, audit clean, family collapsed -> C1/C2 demoted to motivation; ship C3 alone or die with it.
+2. D2 (KILL of C1): any confirmed false RECOVERABLE in the audit -> certificate dead as a decision instrument; publish the counterexample either way.
+3. D3 (theory halt): equivalence memo proves divergence impossible on this class AND family failed -> higher-obstruction vocabulary stripped, memo filed as a lemma.
+4. D4 (stratum failure): honest generator attempt yields < 50 cyclic-realized instances OR within-stratum agreement < 98% after one debug round -> retitle the falsification claim and strip the cohomology layer per Phase 2 rule 2.
+
+Compute: local machine excluded (reserved for concurrent experiments). All shards are thin-run Colab notebooks pinning `v0.3.0`: `nb25_00_nullbattery` (minutes), `nb25_audit_shard_00..05` (6 x <= 10 h at 2 cores, pilot first per Section 11 policy), `nb25_cyclic_shard_00..03` (4 x <= 10 h), `nb25_family` (< 2 h). Twelve notebooks total; each self-contained, embedding its frozen job manifest, resuming via JSONL key dedup, auto-downloading outputs with a safe fallback. Projected total 30-60 CPU-hours.
 
 ---
 
@@ -379,6 +431,14 @@ Known-primary, to verify in WP1.1 (flagged in dossier and/or needing exact locat
 - IPW missing-data lineage (Robins-Rotnitzky-Scharfstein) and pattern-mixture literature (Daniels-Hogan) [exact refs to select].
 - Shpitser-lineage semiparametric identification with missing data [exact ref to verify].
 
+Phase 2.5 additions (foundations for the validation battery; entries mirrored in `refs.bib` with locators):
+- Frechet. Sur les tableaux de correlation dont les marges sont donnees. Ann. Univ. Lyon, Sect. A 14(3), 1951 [no DOI; scanned copies exist via persee/archive.org — verify pagination before citing in the paper].
+- Hoeffding. Masstabinvariante Korrelationstheorie. Skand. Aktuarietidskr. 23, 1940 [no DOI; German; verify pages].
+- Grone, Johnson, Sa, Wolkowicz. Positive definite completions of partial Hermitian matrices. Linear Algebra Appl. 58, 1984, DOI 10.1016/0024-3795(84)90207-6.
+- Manski. Partial Identification of Probability Distributions. Springer, 2003, DOI 10.1007/978-1-4757-3639-7.
+- Daniel, Kenward, Cousens, De Stavola. Using causal diagrams to guide analysis of missing data problems. Stat. Methods Med. Res. 21(3), 2012, DOI 10.1177/0962280210394469.
+- Cheesman, Kanefsky, Taylor. Where the Really Hard Problems Are. IJCAI-91 [proceedings URL to record; cited only as the cautionary phase-transition analogy].
+
 ---
 
 ## Appendix A: Consolidated give-up rules (quick reference)
@@ -387,6 +447,7 @@ Known-primary, to verify in WP1.1 (flagged in dossier and/or needing exact locat
 |-------|------------------------|
 | 1 | Direct-hit prior art (KILL); unexplained correspondence mismatch on the canonical bank after one repair round and no accepted methods-only reroute (KILL); library not green (halt everything) |
 | 2 | Unexplained mismatches > 2% after one debug round (C1/C2 demoted; methods-only reroute or KILL); obstruction uniformly 0% or 100% (strip cohomology layer); habitat table empty, i.e., the estimand is effectively unidentifiable whenever patterns conflict (KILL) |
+| 2.5 | D1 demotion: priority set empty AND audit clean AND discordant family collapsed (C1/C2 -> motivation-only); D2 KILL of C1: any confirmed false RECOVERABLE in the audit (publish the counterexample either way); D3 theory halt: divergence proven impossible on this class and family failed (file memo as lemma, strip higher-obstruction vocabulary); D4 stratum failure: < 50 cyclic-realized instances honestly attempted OR cyclic-stratum agreement < 98% after one debug round |
 | 3 | Fused estimator worse than the strongest simple baseline in ALL regimes including its design-favorable one (KILL unless a live Phase 2 theory contribution stands, default KILL); wins only a fragile < 5% sliver (INCREMENTAL-ONLY, terminate); spurious null-cell gains (halt, fix, rerun) |
 | 4 | Diagnostic no power/localization edge at matched size (cut C4; KILL if C3 also gone); real-data failure (non-terminal: simulation-only paper) |
 | 5 | Genuine counterexample to a targeted theorem (halt proofs, rerun owning gate); G5 INCREMENTAL-ONLY (terminate per portfolio bar) |
