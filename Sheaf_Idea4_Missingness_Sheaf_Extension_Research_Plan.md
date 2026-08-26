@@ -17,6 +17,8 @@ Status: planning document, pre-registration of gates and give-up rules
 7. **Next unresolved gate:** Gate G0 (fatal viability), inside Phase 1, decided by WP1.4.
 8. **Cheapest decisive next action:** WP1.4, the correspondence smoke test: verify on a handful of textbook m-graph instances that the sheaf section/fiber criterion reproduces published recoverability verdicts, and probe whether the construction has any obstruction content at all. Days of work, no new theory required.
 
+> **Amendment (2026-08-26, post-Phase-2.5).** Phases 1-2.5 have run. Outcomes: correspondence holds everywhere it is testable (100% on decidable rows; audited clean, 0 false claims in 899), BUT the certificate is marginally VACUOUS in its claimed value region (constant-RECOVERABLE reproduces 99.95% of its labels; marginal info ~1/2192) and ECONOMICALLY DEAD (~1x the deep search it would replace; >=10x required). The forced cyclic stratum delivered genuine, classical-tools-blind obstruction content (G2.5c PASS); the discordant-family theory path collapsed (G2.5d). Consequence adopted by council review: C1 is DEMOTED to motivation/appendix effective immediately; the program continues ONLY through the pivot-gate week WP3.0 (Section 7, Phase 3 preamble) with a re-aimed Phase 3 behind it; termination-with-boundary-paper is the default if the gate fails. See Sections 6-7 and Appendix A.
+
 ---
 
 ## 2. Idea reconstruction and claim decomposition
@@ -37,8 +39,8 @@ Status: planning document, pre-registration of gates and give-up rules
 
 | ID | Claim | Type | Feasibility | Novelty | Importance | Evidence | Keep / cut / pivot |
 |----|-------|------|-------------|---------|-----------|----------|--------------------|
-| C1 (T1) | The m-graph observed-data factorization (Mohan-Pearl-Tian) is equivalent to the section condition of the canonically built pattern sheaf; recoverability of phi equals constancy of phi on the fiber of global extensions | enabling/grounding | High | Low-medium (translation hazard) | Necessary: anchors all semantics | UNTESTED | Keep as grounding proposition; prove minimally in Phase 5 only after numerics confirm |
-| C2 (T2) | On chains/trees of patterns, pairwise gluing suffices (closed form); on general posets there exist genuine higher obstructions (pairwise-consistent families that fail triple consistency under m-graph constraints) | contribution (theory layer) | Uncertain (Hazard A: obstruction may never fire) | Medium | Medium | UNTESTED | Keep through Phase 2; strip vocabulary if degenerate |
+| C1 (T1) | The m-graph observed-data factorization (Mohan-Pearl-Tian) is equivalent to the section condition of the canonically built pattern sheaf; recoverability of phi equals constancy of phi on the fiber of global extensions | enabling/grounding | High | Low-medium (translation hazard) | Necessary: anchors all semantics | TESTED P2/P2.5: 100% consistency on decidable rows; audited clean (0/899); BUT marginally vacuous (constant-RECOVERABLE null = 99.95%; info ~1/2192) and ~1x deep-search cost -> DEMOTED to motivation/appendix per Amendment 2026-08-26 | Demoted to grounding proposition; no further investment |
+| C2 (T2) | On chains/trees of patterns, pairwise gluing suffices (closed form); on general posets there exist genuine higher obstructions (pairwise-consistent families that fail triple consistency under m-graph constraints) | contribution (theory layer) | Uncertain (Hazard A: obstruction may never fire) | Medium | Medium | PARTIAL P2.5: forced cyclic stratum exhibits genuine signature (30% nonzero fiber spread; 100% LP-incompletable families; classical Frechet certifies uniqueness 0/899). Natural-prevalence untested -> gated by WP3.0a | Keep behind WP3.0a prevalence gate |
 | C3 (T3) | Projection-based pattern-fusion estimator dominates complete-case AND MI simultaneously in a characterizable MNAR-contamination band, and never loses to the best baseline by more than a bounded margin | contribution (expected headline) | Moderate-high | Medium-high (Hazard E) | High | UNTESTED | Keep; primary methods bet |
 | C4 (T4) | Consistency radius r* is a calibrated omnibus test of pattern disagreement (bootstrap-calibrated size) with localization power where pairwise tests are blind | contribution (co-headline) | Moderate | High | High | UNTESTED | Keep; second methods bet |
 | C5 | Mini-library: pattern-poset sheaf, restriction assembly, sheaf Laplacian, H^0/H^1 dims, r*, Gaussian projection | engine | High | Low (tooling, shared with Ideas 1/5) | Enabler | n/a | Keep, tightly scoped |
@@ -114,15 +116,19 @@ Searches run today (arXiv API): `"sheaf" AND "missing data"` (2 hits, inspected 
 ## 6. Dependency graph and gate map
 
 ```text
-P1 De-risk & enable (G0 validity, G1 novelty, G2 implementability)      [ACTIVE]
-   -> P2 Enumeration falsification of C1/C2 (G3a)                       [ACTIVE after P1]
-      -> P2.5 Independent validation battery C1/C2 (G2.5a-d)            [ACTIVE after P2; parallel-safe with P3]
-   -> P3 Fusion benchmark C3 (G3b)                                      [ACTIVE after P1; parallel-safe with P2/P2.5]
-        -> P4 Diagnosis C4 + scaling + real-data smoke (G3c, G4a)       [ACTIVE after P3]
-             -> P5 Evidence-earned theory + paper (G5, G6)              [DORMANT UNTIL P4 gate]
+P1 De-risk & enable (G0 validity, G1 novelty, G2 implementability)      [COMPLETE 2026-08: all GO]
+   -> P2 Enumeration falsification of C1/C2 (G3a)                       [COMPLETE 2026-08-25: PASS, engine undecided on 64.6%]
+       -> P2.5 Independent validation battery C1/C2 (G2.5a-d)           [COMPLETE 2026-08-26: b,c PASS; d COLLAPSE; pricing FAIL]
+           -> P2.75 Pivot-gate week (G2.6)                              [ACTIVE NEXT: three probes, hard >=2/3 gate]
+               -> P3' Fusion benchmark C3, RE-AIMED (G3b)               [CONDITIONAL on G2.6 pass]
+                    -> P4 Diagnosis C4 + scaling + real-data smoke (G3c, G4a)  [DORMANT UNTIL P3' gate]
+                         -> P5 Evidence-earned theory + paper (G5, G6)     [DORMANT UNTIL P4 gate]
+   -> (parallel branch) Boundary/obstruction paper from P2.5 assets       [ACTIVE if G2.6 fails]
 ```
 
-Parallelism note: P2 (representation theory falsification) and P3 (estimation benchmark) consume disjoint Phase 1 outputs and kill independently; running them concurrently wastes nothing if either dies. P2.5 validates the certificate with non-shared oracles only and shares no code path with P3, so it gates framing and demotion, never the estimator race. P4 waits on P3 (diagnosis is only worth building around a surviving estimator) and uses P2/P2.5 findings as framing only.
+Parallelism note: P2 (representation theory falsification) and P3 (estimation benchmark) consume disjoint Phase 1 outputs and kill independently; running them concurrently wastes nothing if either dies. P2.5 validated the certificate with non-shared oracles only and shares no code path with P3, so it gates framing and demotion, never the estimator race. P4 waits on P3 (diagnosis is only worth building around a surviving estimator) and uses P2/P2.5 findings as framing only.
+
+**Post-Phase-2.5 note.** The original rescue clause ("a clean G2.5b+G2.5c+G2.5d overrides a Phase-3 KILL default") is weakened: G2.5d collapsed. Any future correspondence-rescue of a failed Phase 3 additionally requires WP3.0c (signal validity) to return GO — the audit alone cannot carry it, because a certificate that commits to UNRECOVERABLE once per 2192 rows cannot fail an audit informatively.
 
 ---
 
@@ -260,28 +266,66 @@ Compute: the LP engine is the first heavy job. Pilot locally; projected total 20
 
 Compute: local machine excluded (reserved for concurrent experiments). All shards are thin-run Colab notebooks pinning `v0.3.0`: `nb25_00_nullbattery` (minutes), `nb25_audit_shard_00..05` (6 x <= 10 h at 2 cores, pilot first per Section 11 policy), `nb25_cyclic_shard_00..03` (4 x <= 10 h), `nb25_family` (< 2 h). Twelve notebooks total; each self-contained, embedding its frozen job manifest, resuming via JSONL key dedup, auto-downloading outputs with a safe fallback. Projected total 30-60 CPU-hours.
 
+**Outcome (2026-08-26; full detail in `docs/phase25_report.md`, raw data in `results/phase25/`).**
+- G2.5a QUANTIFIED: constant-RECOVERABLE null reproduces 99.95% of certificate labels on the 2192 undecided rows; corrected Frechet widths large everywhere (medians ~0.50); S* = 200 rows (nonempty).
+- G2.5b PASS: 0 confirmed false RECOVERABLE in 899/901 audited rows (one instance, n4_r0199_d0, pending a single-instance patch notebook); pooled rule-of-three bound <= 0.33%; A2 maximal model-valid fiber spread 1.4e-10 vs tolerance 1e-4. CAVEAT recorded: with ~1 UNRECOVERABLE commitment per 2192 rows the audit has almost no discriminating power; cleanliness is weak evidence of value.
+- G2.5c PASS: forced cyclic stratum realized (560 instances, 1120 target rows, all Berge-cyclic); decidable-row agreement 100% (336 TN, FP=FN=0); obstruction signature 30% strictly inside (0%,100%); observed families LP-incompletable on 100%; classical Frechet certification on 0/899 audit rows.
+- G2.5d COLLAPSE: 3/120 witnessed discordant members (threshold >= 10); origin seed itself not witnessed; theory-note path closed, folded into limitations.
+- WP2.5.5 equivalence memo remains OPEN (desk work).
+- WP2.5.6 pricing FAILS the >=10x bar where it matters: attack/certificate pipeline ~1.03x at n=3, 6.0x at n=2 (apples-to-apples on undecided rows). Applied triage narrative dead as pre-registered.
+- Demotion rules: D1 NOT triggered (S* nonempty), D2 not triggered, D4 not triggered (140/shard vs floor 50). Net: C1 survives statistically but is demoted economically and informationally per the Amendment in Section 1; C2's cyclic-obstruction asset is real but its natural prevalence is untested -> motivates WP3.0 below.
+
 ---
 
-### Phase 3: Robust fusion benchmark C3 (target: 3-4 weeks; starts after Phase 1, parallel with Phase 2)
+### Phase 3: Pivot-gate week (WP3.0) and re-aimed fusion benchmark C3 (target: 1 gate week + 3-4 weeks benchmark; supersedes the original unconditional Phase 3)
 
-**Purpose and scientific question.** Does the projection-based fused estimator beat honest strong baselines (complete-case, tuned MI, IPW, pattern-mixture) in a characterizable band, and does the predicted dominance boundary match the T3 bias analysis? Gate G3b. This is the primary methods bet.
+**Purpose and scientific question (amended 2026-08-26 after council review of Phase 2.5).** The original Phase 3 pitch leaned on the certificate layer for its differentiating mechanism; Phase 2.5 measured that mechanism at ~zero on small binary m-graphs (marginal information ~1/2192 over a constant policy) and priced it at ~1x the deep search. Running the original 3-4-week benchmark without new justification is the zombie scenario the portfolio rules exist to prevent; abandoning the program outright ignores the one verified-live asset (cyclic-stratum obstruction content that classical tools provably cannot certify). Phase 3 therefore opens with a ONE-WEEK PIVOT GATE (WP3.0, three cheap decisive probes, pre-registered thresholds, hard >=2/3 rule), and only behind that gate runs a RE-AIMED benchmark concentrated where the surviving theory predicts wins.
 
-**Prerequisites.** Phase 1 gates passed. (Does not consume Phase 2 outputs.)
+**Prerequisites.** Phase 1 gates passed (done). Phase 2/2.5 artifacts frozen (done). C1 demoted to motivation per Amendment; no further certificate investment except inside WP3.0 probes.
 
-#### WP3.1 Gaussian closed-form engine and Hazard E characterization
-- Implement the fused estimator via sheaf-Laplacian pseudoinverse projection; derive and code the bias expression under pattern-specific shifts; **explicitly characterize the equivalence class**: state for which configurations the projection coincides with minimum-distance pooling of pattern moments, and identify what differs (restriction selection from the m-graph; weighting; behavior off the consistent manifold). Output `results/phase3/hazard_E_memo.md`. If the estimator is *always* exactly generic MD with no distinguishing behavior, record it: the methods novelty then rests entirely on the robustness band and C4.
+#### WP3.0 Pivot-gate week (NEW; three parallelizable probes + hard gate; target <= 7 days)
 
-#### WP3.2 Benchmark grid
-- Estimators: fused projection; complete-case; IPW (missingness weights); MI (normal-model and MICE-style, tuned per protocol); pattern-mixture baseline; naive pooling; oracle. DGPs: (i) MAR null (all estimators tie within MC error); (ii) baseline-favorable (one pattern clean and dominant, CC/MI should win); (iii) MNAR pattern-shift sweep (the predicted dominance band); (iv) contaminated-pattern (single pattern's law shifted, others clean); (v) crossover grid: shift magnitude x n x dimension x pattern-count. Metrics: RMSE on E[Y] and ATE, coverage where intervals exist, worst-decile error across replicates; >= 100 replicates for decisive cells; frozen seed lists.
-- Pre-registered thresholds: fused beats complete-case AND tuned MI simultaneously over >= 25% of the shift grid in the MNAR band; never worse than the best baseline by more than 10% anywhere on the grid; null-cell gaps within MC error; empirical dominance-boundary matches the WP3.1 bias-expression prediction within stated tolerance.
+##### WP3.0a Natural-prevalence scan of cyclic missingness (~3 days; CPU-light)
+- Question: does the obstruction phenomenon live anywhere practitioners actually are? Every cyclic instance so far was FORCED by construction; if natural data never realizes cyclic overlap structure, C2 has no audience and the re-aimed benchmark has no home stratum.
+- Design: >= 8 public datasets with substantive missingness (NHANES cycles/subscales, UCI adult-style sets, any Kaggle/social-survey set with >= 5% missing); for each dataset and each variable subset of size 3-6 with >= 4 realized patterns, build the observed-set overlap hypergraph and test Berge-cyclicity (existing `graham_acyclic`); record cyclic fraction per dataset and overall, plus whether cyclic subsets involve partial (not nested-only) overlaps.
+- Pre-registered GO: cyclic realized pattern-structure appears in >= 3 independent datasets OR >= 15% of eligible subsets pooled. NO-GO: cyclic structures are artifacts of our generator only.
+- Output: `results/phase3/prevalence_scan.{json,csv}`.
+- Compute: minutes-hours, local (read-only dataset access per Section 9 early-feasibility rules).
 
-**Give-up rules (Phase 3).**
-1. Fused estimator worse than the strongest simple baseline across ALL regimes including its design-favorable one (the user's headline kill condition): methods contribution dead -> KILL unless Phase 2 delivered a live correspondence contribution worth a standalone theory note (user decides; default KILL).
+##### WP3.0b Scaling probe: silence rate and cost crossover at n=5-6 (~3 days; 1-2 Colab shards)
+- Question: both headline failures (65% engine silence; attack/certificate ~1x) were measured at n<=4. Exact-search cost grows combinatorially while LP/fiber costs stay mild; does the picture invert just past the tested range?
+- Design: extend the enumeration sampler to n=5 (n=6 if pilot says tractable): sample >= 400 structures x 1 draw; run engine round1+round2 unchanged; run attackers at fixed budget on undecided x RECOVERABLE rows only; log wall times split engine/LP/fiber/attack.
+- Pre-registered readings (recorded regardless): engine decidability rate at n=5 vs n=4; attack/cert cost ratio trend in n. GO-for-benchmark-feasibility: decidability >= 50% at n=5 (labels obtainable on harder instances). GO-for-certificate-economics: ratio >= 3x AND strictly increasing from n=4 to n=5. Either GO feeds the gate; both NO-GO recorded as confirmation that the certificate has no accessible regime at any testable scale.
+- Output: `results/phase3/scaling_probe.{jsonl,json}`.
+- Compute: est. 20-60 CPU-hours -> 1-2 thin-run Colab notebooks (v0.3.0 pattern).
+
+##### WP3.0c Signal-validity probe: does ANY sheaf-side feature predict ground truth? (~3 days; piggybacks on WP3.0b compute)
+- Question: on rows carrying REAL labels, do sheaf features beat chance? Note the circularity trap: among decided rows, fiber spread trivially separates verdicts (it IS the verdict input). The honest test lives where labels are expensive: fresh undecided rows at n>=5, plus the forced-cyclic stratum, labeled by the full attacker battery.
+- Design: pool all labeled rows (3394-row merge + 1120 cyclic rows + WP3.0b fresh rows). Labels: engine-decided verdicts where available; attacker-found unrecoverability for undecided rows. Features: corrected Frechet width, Jacobian rank deficiency, max cross-pattern marginal gap, fraction observed, overlap density (all already implemented). Metrics: AUC of each feature (and a small logistic combo) for predicting UNRECOVERABLE among undecided-labeled rows, against TWO null baselines: (i) label-permutation within matched strata, (ii) features computed on random-m-graph matches. Downstream add-on: correlation of spread with naive-pooling error across DGP draws.
+- Pre-registered GO: AUC >= 0.75 on attacker-labeled undecided rows (permutation p < 0.01) OR downstream |rho| >= 0.30 with p < 0.01. NO-GO: no feature clears chance once the trivial separation is excluded -> certificate-class instruments carry zero information at accessible scales, permanently closing the correspondence track (C2's obstruction characterization may still stand on WP3.0a).
+- Output: `results/phase3/signal_validity.{json,csv}`.
+
+##### Gate G2.6 (hard rule)
+- PROCEED to WP3.1'/WP3.2' iff AT LEAST 2 of {WP3.0a, WP3.0b(feasibility arm or economics arm), WP3.0c} return GO. Ties broken toward proceeding ONLY when WP3.0c is one of the GOs (signal validity is non-negotiable: without it there is nothing for the estimator or the paper to lean on).
+- FAIL (< 2 GO, or the tie-break fails): TERMINATE the program as originally framed. Write the boundary paper from existing assets: degeneracy result (constant-policy equivalence at 99.95%), audited error bound (<= 0.33%), cyclic obstruction characterization with classical-blindness witness (Frechet certifies 0/899). Venue: workshop/UAI-short. No Phase 3 spend. This is the pre-committed anti-zombie exit.
+
+#### WP3.1' Gaussian closed-form engine, Hazard E characterization, and the WRITTEN WIN-PREDICTION (gate to the benchmark)
+- As original WP3.1 (fused estimator via sheaf-Laplacian pseudoinverse projection; bias expression under pattern-specific shifts; explicit minimum-distance equivalence class), PLUS the council-mandated addition: a one-to-two-page WRITTEN PREDICTION, committed before any benchmark cell runs, naming (i) the exact instance class/DGP family where the fused estimator beats tuned MI (expected: contaminated-pattern and cyclic-stratum cells, with the restriction structure doing the work generic MD cannot), (ii) the predicted margin band, and (iii) what observed result would falsify the prediction. No prediction document -> no WP3.2' runs. Output `results/phase3/hazard_E_memo.md` + `results/phase3/win_prediction.md`.
+
+#### WP3.2' Re-aimed benchmark grid
+- Estimators unchanged: fused projection; complete-case; IPW; MI (normal-model and MICE-style, tuned per protocol); pattern-mixture baseline; naive pooling; oracle.
+- DGPs re-weighted by the evidence: PRIMARY axis = contaminated-pattern and cyclic-informed regimes (single pattern shifted; patterns drawn from forced-cyclic structures; shift localized where the restriction structure differs from naive pooling), since these are where the surviving theory predicts separation and where baselines lack guidance. GUARD cells kept unchanged: MAR null (all tie within MC error), baseline-favorable (CC/MI should win), MNAR sweep, crossover grid (shift x n x dimension x pattern-count).
+- Metrics and thresholds unchanged and non-negotiable: RMSE on E[Y] and ATE, coverage where intervals exist, worst-decile error; >= 100 replicates for decisive cells; frozen seed lists; fused beats complete-case AND tuned MI simultaneously over >= 25% of the primary-axis grid; never worse than best baseline by > 10% anywhere; null-cell ties within MC error; empirical dominance boundary matches the WP3.1' prediction within stated tolerance.
+- Reporting duty added post-2.5: every table carries the silence-rate context (what fraction of each DGP cell the ground-truth engine could label), so readers see label provenance explicitly.
+
+**Give-up rules (Phase 3, amended).**
+1. Fused estimator worse than the strongest simple baseline across ALL regimes including its design-favorable one: methods contribution dead -> KILL. Rescue clause AMENDED: the old "live correspondence contribution" override now requires G2.5b+G2.5c clean (already true) AND WP3.0c GO; absent that, default KILL stands and the boundary paper ships alone.
 2. Wins confined to a fragile sliver (< 5% of the grid) or erased by modest misspecification/tuning sensitivity: INCREMENTAL-ONLY -> terminate per portfolio bar; archive artifacts, write a short diagnostic.
 3. Estimator requires unavailable information (true shift magnitudes, true m-graph beyond stated assumptions) with no working data-driven replacement after one repair round: treat as fail rule 1 or 2 depending on severity.
 4. Null cell shows spurious fused-estimator gains beyond MC error: implementation bug or leakage; halt, fix, rerun before reading any other cell.
+5. NEW: the written win-prediction of WP3.1' must exist and pre-date the first benchmark run; retro-fitted predictions void the gate and count as fail rule 2 severity.
 
-Compute: thousands of small jobs; pilot first. Mostly local; reserve up to ~10 Colab notebooks for MI-heavy high-dimensional cells if projected > 2 h or > 4 GB.
+Compute: WP3.0 week ~20-80 CPU-hours total (mostly local + 1-2 Colab shards). WP3.1' local days. WP3.2' thousands of small jobs; pilot first; mostly local; reserve up to ~10 Colab notebooks for MI-heavy high-dimensional cells if projected > 2 h or > 4 GB.
 
 ---
 
@@ -337,7 +381,7 @@ Claims-to-experiments matrix (decisive rows first):
 | C1/C2 correspondence | section/fiber criterion mirrors m-graph semantics | enumerated binary m-graphs, 3-4 vars | agreement %, unexplained mismatch % | LP ground truth + published verdicts | constraint-free sheaf (expected degenerate) | agreement >= 98%, unexplained <= 2% | systematic mismatch bands | `results/phase2/enumeration.csv` |
 | C2 content | constraints create genuine obstruction | engineered + enumerated instances | % instances nonzero obstruction | constraint-free ablation | - | strictly between 0% and 100% | uniformly 0% or 100% | `results/phase2/content.csv` |
 | Habitat (N) | conflict-compatible recoverability exists | enumerated structures x queries | |class(conflict, recoverable)| > 0 | LP labels | - | nonempty intersection | empty intersection | `results/phase2/habitat.csv` |
-| C3 fusion | projection removes incompatible component | Gaussian MAR/MNAR/contamination grids | RMSE vs oracle; dominance %; worst-decile | tuned MI, CC, IPW, PMM, pooling | no-projection control; equal-weight pooling | dominance >= 25% of MNAR band; never lose > 10%; null ties | uniform loss | `results/phase3/fusion.csv` |
+| C3 fusion | projection removes incompatible component | Gaussian MAR/MNAR/contamination grids; PRIMARY axis post-2026-08-26: contaminated-pattern + forced-cyclic-informed regimes (behind G2.6 gate) | RMSE vs oracle; dominance %; worst-decile | tuned MI, CC, IPW, PMM, pooling | no-projection control; equal-weight pooling | dominance >= 25% of MNAR band; never lose > 10%; null ties | uniform loss | `results/phase3/fusion.csv` |
 | C3 band | T3 predicts the dominance boundary | shift sweep | boundary match | analytic prediction | - | within stated tolerance | boundary mismatch | `results/phase3/band.csv` |
 | C4 r* test | joint disagreement detection + localization | planted contamination grid | power at matched size; top-1 localization | Little, pairwise chi-square/KS | r* on wrong poset | +10 pp power; localization >= 70%; size ok | no separation | `results/phase4/diagnosis.csv` |
 | Null calibration | no free lunches | MAR null, clean patterns | size; FP; RMSE ties | all | - | size <= alpha + tol | inflated size / fake gains | `results/phase{3,4}/null.csv` |
@@ -401,8 +445,19 @@ Environment lock (`requirements.txt` with versions) frozen at end of Phase 1; ev
 | Real-data smoke failure | Medium | Weaker paper | WP4.3 | Fix once; else simulation-only paper, stated honestly | No | WP4.3 |
 | Decorative theory temptation | Medium | Wasted months, diffuse paper | G5 discipline | Phase 5 dormant until Phase 4 gate | No | Phase 5 |
 | Diffuse story (theory + two method bets) | Medium | Rejects at strong venues | G6 referee simulation | Methods-led skeleton; theory earns paragraphs via Phase 3/4 results | No | Phase 5 |
+| Certificate marginally vacuous + uneconomic (REALIZED P2.5) | Resolved->fact | C1 demoted; applied triage story dead | WP2.5.1 battery, WP2.5.6 pricing | Demote C1 to motivation (Amendment 2026-08-26); program re-gated behind WP3.0 probes | Partially (program continues only through G2.6) | WP3.0 |
+| Cyclic-stratum asset has no natural habitat | Medium-high | Kills C2 audience and the re-aimed benchmark's home stratum | WP3.0a prevalence scan (3 days) | If NO-GO: boundary paper exit per Appendix A row 2.75 | Yes (for this framing) | WP3.0a |
 
 ## 13. Immediate actions (stop at the next unresolved gate)
+
+Status: items 1-5 below were the Phase-1 program and are COMPLETE (G0/G1/G2 all GO; Phases 2, 2.5 also complete). The current immediate actions are:
+
+1. **WP3.0a** natural-prevalence scan (3 days, local) -> `results/phase3/prevalence_scan.{json,csv}`.
+2. **WP3.0b+c** scaling + signal-validity probes (<= 7 days, 1-2 Colab shards at tag `v0.3.0`) -> `results/phase3/scaling_probe.*`, `signal_validity.*`.
+3. Gate **G2.6** adjudication memo (`results/phase3/gate_G26_memo.md`): >=2/3 GO proceeds to WP3.1'; otherwise boundary-paper exit per Appendix A.
+4. Only after G2.6 GO: WP3.1' hazard-E memo plus the written win-prediction; then WP3.2'.
+
+Original Phase-1 list (historical):
 
 1. WP1.1: run the remaining query families; upgrade/downgrade the Section 4 table; draft `refs.bib`; set watch alerts. Output: `docs/evidence_register.md`.
 2. WP1.2: implement the LP recoverability engine + Gaussian ground truth; transcribe the textbook bank; tests green. Output: `src/sheafpatternfusion/lp_ground_truth.py`, `tests/test_ground_truth.py`.
@@ -410,7 +465,7 @@ Environment lock (`requirements.txt` with versions) frozen at end of Phase 1; ev
 4. WP1.4: run the correspondence/content smoke test against the bank. Output: `docs/smoke_report.md`. This resolves Gate G0.
 5. In parallel once WP1.3 lands: WP1.5 library core with property tests.
 
-Nothing beyond Phase 1 is scheduled until G0 (and G1/G2) return GO; Phases 2-5 remain conditional branches.
+Nothing beyond the current gate is scheduled until G2.6 returns its verdict; Phase 3' and everything downstream remain conditional branches.
 
 ## 14. References (verification status as of Aug 2026)
 
@@ -448,7 +503,8 @@ Phase 2.5 additions (foundations for the validation battery; entries mirrored in
 | 1 | Direct-hit prior art (KILL); unexplained correspondence mismatch on the canonical bank after one repair round and no accepted methods-only reroute (KILL); library not green (halt everything) |
 | 2 | Unexplained mismatches > 2% after one debug round (C1/C2 demoted; methods-only reroute or KILL); obstruction uniformly 0% or 100% (strip cohomology layer); habitat table empty, i.e., the estimand is effectively unidentifiable whenever patterns conflict (KILL) |
 | 2.5 | D1 demotion: priority set empty AND audit clean AND discordant family collapsed (C1/C2 -> motivation-only); D2 KILL of C1: any confirmed false RECOVERABLE in the audit (publish the counterexample either way); D3 theory halt: divergence proven impossible on this class and family failed (file memo as lemma, strip higher-obstruction vocabulary); D4 stratum failure: < 50 cyclic-realized instances honestly attempted OR cyclic-stratum agreement < 98% after one debug round |
-| 3 | Fused estimator worse than the strongest simple baseline in ALL regimes including its design-favorable one (KILL unless a live Phase 2 theory contribution stands, default KILL); wins only a fragile < 5% sliver (INCREMENTAL-ONLY, terminate); spurious null-cell gains (halt, fix, rerun) |
+| 2.75 (WP3.0 pivot gate, G2.6) | Fewer than 2 of {prevalence scan GO, scaling probe GO, signal-validity probe GO} — or 2 GOs without signal-validity among them — (TERMINATE original program; ship boundary paper from P2.5 assets: degeneracy result + <=0.33% audited bound + cyclic obstruction characterization with classical-blindness witness) |
+| 3 | Fused estimator worse than the strongest simple baseline in ALL regimes including its design-favorable one (KILL unless G2.5b+G2.5c clean AND WP3.0c GO, default KILL); wins only a fragile < 5% sliver (INCREMENTAL-ONLY, terminate); spurious null-cell gains (halt, fix, rerun); benchmark run without the pre-committed written win-prediction (treated as INCREMENTAL-ONLY severity) |
 | 4 | Diagnostic no power/localization edge at matched size (cut C4; KILL if C3 also gone); real-data failure (non-terminal: simulation-only paper) |
 | 5 | Genuine counterexample to a targeted theorem (halt proofs, rerun owning gate); G5 INCREMENTAL-ONLY (terminate per portfolio bar) |
 
