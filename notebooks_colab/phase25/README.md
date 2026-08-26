@@ -1,14 +1,16 @@
 # Phase 2.5 Colab notebooks (pinned to tag `v0.3.0`)
 
 Twelve self-contained thin runners for the WP2.5.1-WP2.5.4 experiments
-(research plan, Phase 2.5), using the same install pattern as the Phase-2
-shards: each notebook **pip-installs sheafpatternfusion@v0.3.0** (pulling the
-ABI-matched numpy 2.4.3 / scipy 1.17.1 pins), **restarts the kernel once**
-(upgrading numpy/scipy in place without a restart produces mixed-version
-AttributeErrors such as `_blas_supports_fpe`), and on the second
-Runtime > Run all detects the pins, skips the install, and proceeds. Nothing
-depends on another notebook's runtime state or outputs. Upload each to its own
-Colab account/runtime (CPU runtime is sufficient; ~2 cores, ~12 GB RAM).
+(research plan, Phase 2.5). Install flow per notebook (one-time per
+session): the first cell **pip-installs sheafpatternfusion@v0.3.0** (pulling
+the ABI-matched numpy 2.4.3 / scipy 1.17.1 pins) and then HALTS with a
+message; do **Runtime > Restart session once** (upgrading numpy/scipy in
+place without a restart produces mixed-version AttributeErrors such as
+`_blas_supports_fpe`), then **Runtime > Run all** — the install cell detects
+the pins and skips, and everything runs to completion with auto-downloaded
+outputs. Nothing depends on another notebook's runtime state or outputs.
+Upload each to its own Colab account/runtime (CPU runtime is sufficient;
+~2 cores, ~12 GB RAM).
 
 ## Roster and expected wall times
 

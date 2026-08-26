@@ -56,7 +56,6 @@ def notebook(name, cells):
 def install_cell(pkg_version: str):
     return code_cell(f"""
 import importlib.metadata as md
-import os
 import subprocess
 import sys
 
@@ -72,7 +71,8 @@ def _ver(pkg):
         return None
 
 
-if all(_ver(p) == v for p, v in WANT.items()):
+missing = {{p: v for p, v in WANT.items() if _ver(p) != v}}
+if not missing:
     print('environment OK:', WANT)
 else:
     print('installing sheafpatternfusion@' + TAG + ' (one-time per session) ...')
@@ -80,11 +80,13 @@ else:
                           f'git+{{REPO}}@{{TAG}}'])
     if res.returncode != 0:
         raise RuntimeError('pip install failed; see log above')
-    print('installed -> restarting the kernel so the ABI-matched numpy/scipy')
-    print('binaries load cleanly.')
-    print('When the runtime reconnects, run Runtime > Run all again; this')
-    print('cell will detect the pins and skip.')
-    os.kill(os.getpid(), 9)
+    print()
+    print('=' * 72)
+    print('DEPENDENCIES INSTALLED. One manual step left:')
+    print('  1) Runtime > Restart session ...   (clears the old numpy/scipy)')
+    print('  2) Runtime > Run all               (this cell will skip)')
+    print('=' * 72)
+    raise SystemExit('restart required before importing numpy/scipy')
 """.lstrip().splitlines(keepends=True))
 
 
@@ -194,10 +196,11 @@ def header_md(title, purpose, expected, extra=""):
         f"Code: pip-installed from hugogobato/sheafpatternfusion @ {TAG}.\n"
         f"Runtime: CPU-only (~2 cores). Expected wall time: {expected}.\n"
         "\n"
-        "The first cell installs the pinned package and restarts the kernel "
-        "once (required after upgrading numpy/scipy in place). After the "
-        "runtime reconnects, run Runtime > Run all again; the install cell "
-        "detects the pins and skips." + ("\n\n" + extra if extra else ""))
+        "First run: the first cell installs the pinned package and then HALTS "
+        "with a message. Do Runtime > Restart session once (clears the "
+        "preloaded numpy/scipy so the ABI-matched binaries load), then "
+        "Runtime > Run all again; the install cell detects the pins and "
+        "skips. Later runs on a warm session go straight through." + ("\n\n" + extra if extra else ""))
 
 
 def cfg_cells(cfg_pairs):
