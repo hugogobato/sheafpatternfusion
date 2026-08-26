@@ -375,7 +375,7 @@ Anticipated triggers: Phase 2 LP enumeration (wall-time driven, est. 12-20 noteb
 
 ```
 /home/hugo_souto/Stuff/Research/sheafpatternfusion/
-  src/sheafpatternfusion/   poset.py sheaf.py laplacian.py radius.py fuse.py mdag_dgp.py lp_ground_truth.py gaussian_ground_truth.py
+  src/sheafpatternfusion/   poset.py sheaf.py laplacian.py radius.py fuse.py mdag_dgp.py lp_ground_truth.py gaussian_ground_truth.py battery.py attackers.py cyclic_synth.py discordant_family.py workers.py (v0.3.0 Phase-2.5 modules)
   tests/                    property + ground-truth + hand-checked-example tests
   configs/                  examples/ phase2/ phase3/ phase4/ seeds.txt
   docs/                     formalization_v0.md evidence_register.md smoke_report.md hazard_E_memo.md

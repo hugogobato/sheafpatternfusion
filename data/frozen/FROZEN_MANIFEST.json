@@ -1,0 +1,11 @@
+{
+ "file": "instances_merged.jsonl",
+ "sha256": "ff85494a99e1e79a1d5f1d0df0f01e27e99b90a9bd99ebbd43125e5ce7c94d51",
+ "n_rows": 3394,
+ "frozen_from_commit": "b11cbd6044303c517ca97fe04b9eb99bad73a5cd",
+ "provenance": "Phase 2 full-grid merge (3394/3394 expected rows, COLLECT_REPORT all-zero anomalies); see COLLECT_REPORT.json",
+ "consumers": [
+  "nb25_00_nullbattery",
+  "nb25_audit_shard_00..05 (self-fetch at tag v0.3.0)"
+ ]
+}

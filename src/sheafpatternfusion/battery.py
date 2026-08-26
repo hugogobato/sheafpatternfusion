@@ -123,7 +123,27 @@ def overlap_density(patterns: list[tuple]) -> float:
     return float(np.mean(js)) if js else 0.0
 
 
-def evaluate_nulls(rows: list[dict], cfg: dict | None = None) -> dict:
+def score_row(row: dict, tau_cfg: dict | None = None) -> dict:
+    """Per-row null features + corrected Frechet interval (streaming-friendly;
+    used verbatim by the Colab battery and audit notebooks)."""
+    inst, q, pp = instance_from_row(row)
+    fb = frechet_bounds(inst.n_vars, q, pp, tuple(row["target"]))
+    return {
+        "instance_id": row["instance_id"],
+        "target": list(row["target"]),
+        "n_vars": row["n_vars"],
+        "sheaf_recoverable": row["sheaf_recoverable"],
+        "frac_observed": round(fraction_observed(pp, row["n_vars"]), 6),
+        "overlap_density": round(overlap_density(
+            [tuple(p) for p in row["patterns"]]), 6),
+        "frechet_lo": fb["lo"],
+        "frechet_hi": fb["hi"],
+        "frechet_width": fb["width"],
+        "true_value": row.get("true_value"),
+    }
+
+
+def aggregate_results(scored: list[dict], cfg: dict | None = None) -> dict:
     cfg = cfg or {}
     tau_frac = cfg.get("tau_frac_observed",
                        [round(0.30 + 0.02 * k, 2) for k in range(36)])
@@ -131,29 +151,9 @@ def evaluate_nulls(rows: list[dict], cfg: dict | None = None) -> dict:
     tau_width = cfg.get("tau_width", [1e-3, 0.05, 0.10, 0.15, 0.20, 0.25,
                                       0.30, 0.35, 0.40, 0.45])
     s_cap = int(cfg.get("priority_sample_cap", 200))
-
-    scored = []
-    for row in rows:
-        inst, q, pp = instance_from_row(row)
-        fb = frechet_bounds(inst.n_vars, q, pp, tuple(row["target"]))
-        rec = {
-            "instance_id": row["instance_id"],
-            "target": list(row["target"]),
-            "n_vars": row["n_vars"],
-            "sheaf_recoverable": row["sheaf_recoverable"],
-            "frac_observed": round(fraction_observed(pp, row["n_vars"]), 6),
-            "overlap_density": round(overlap_density(
-                [tuple(p) for p in row["patterns"]]), 6),
-            "frechet_lo": fb["lo"],
-            "frechet_hi": fb["hi"],
-            "frechet_width": fb["width"],
-            "true_value": row.get("true_value"),
-        }
-        scored.append(rec)
-
     label = lambda r: r["sheaf_recoverable"] == "RECOVERABLE"  # noqa: E731
 
-    def confusion(pred_rec: list[bool]):
+    def confusion(pred_rec):
         tp = sum(1 for p, r in zip(pred_rec, scored) if p and label(r))
         tn = sum(1 for p, r in zip(pred_rec, scored) if not p and not label(r))
         fp = sum(1 for p, r in zip(pred_rec, scored) if p and not label(r))
@@ -178,10 +178,8 @@ def evaluate_nulls(rows: list[dict], cfg: dict | None = None) -> dict:
         if best["N2"] is None or c["accuracy"] > best["N2"]["accuracy"]:
             best["N2"] = {"tau": tau, **c}
     for tau in tau_width:
-        def pred(r, tau=tau):
-            w = r["frechet_width"]
-            return not (w is not None and w > tau)
-        c = confusion([pred(r) for r in scored])
+        c = confusion([not (r["frechet_width"] is not None
+                            and r["frechet_width"] > tau) for r in scored])
         sweeps["N3"].append({"tau": tau, **c})
         if best["N3"] is None or c["accuracy"] > best["N3"]["accuracy"]:
             best["N3"] = {"tau": tau, **c}
@@ -200,15 +198,22 @@ def evaluate_nulls(rows: list[dict], cfg: dict | None = None) -> dict:
         }
     metrics["frechet_width_by_n"] = by_n
 
-    cand = [r for r in scored if r["sheaf_recoverable"] == "RECOVERABLE"
-            and r["frechet_width"] is not None]
+    cand = [r for r in scored if label(r) and r["frechet_width"] is not None]
     cand.sort(key=lambda r: (-r["frechet_width"], r["instance_id"],
                              json.dumps(r["target"])))
-    priority = [dict(r, reason="widest_frechet_vs_certificate") for r in cand[:s_cap]]
+    priority = [dict(r, reason="widest_frechet_vs_certificate")
+                for r in cand[:s_cap]]
     discordant = [dict(r, reason="certificate_unrecoverable_engine_undecided")
-                  for r in scored if r["sheaf_recoverable"] != "RECOVERABLE"]
+                  for r in scored if not label(r)]
     metrics["S_star_size"] = len(priority)
     metrics["S_star_rule"] = (f"top-{s_cap} certificate-RECOVERABLE rows by "
                               "corrected Frechet width (ties: id, target)")
-    return {"scored": scored, "metrics": metrics,
-            "priority_sample": priority + discordant}
+    return {"metrics": metrics, "priority_sample": priority + discordant}
+
+
+def evaluate_nulls(rows: list[dict], cfg: dict | None = None) -> dict:
+    cfg = cfg or {}
+    scored = [score_row(row, cfg) for row in rows]
+    out = aggregate_results(scored, cfg)
+    out["scored"] = scored
+    return out

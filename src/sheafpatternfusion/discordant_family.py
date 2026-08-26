@@ -25,7 +25,7 @@ import time
 import numpy as np
 
 from .attackers import frechet_cell_scan
-from .engine2 import collect_roots_early, decide2
+from .engine2 import decide2
 from .enumerate_structures import classify, instantiate
 from .gluing import marginal_problem_lp
 from .lp_ground_truth import (
@@ -59,35 +59,29 @@ def member_draw_seed(k: int, cfg: dict) -> int:
 
 
 def _model_pair(inst, theta_ref, target, patterns, cfg: dict, rng_seed: int):
-    rng = np.random.default_rng(rng_seed)
-    from .lp_ground_truth import param_bounds
+    from .attackers import FastFingerprint, collect_roots_fast, fast_manifold_walk
 
-    lo, hi = param_bounds(inst)
-    free = np.where(hi - lo > 0)[0]
+    ff = FastFingerprint(inst)
     dist_tol = float(cfg.get("dist_tol", 1e-9))
     phi_tol = float(cfg.get("phi_tol", 1e-4))
-    roots = collect_roots_early(
+    phi_ref = ff.target_value(theta_ref, target[1])
+    roots = collect_roots_fast(
         inst, theta_ref, patterns,
         n_starts=int(cfg.get("member_root_starts", 200)),
         max_roots=int(cfg.get("member_max_roots", 16)),
-        seed=rng_seed)
-    phis = [target_value_phi(unpack(inst, r), target) for r in roots]
-
-    def check_pair(a_th, b_th, route):
-        fa, _ = observed_vector(unpack(inst, a_th), patterns)
-        fb, _ = observed_vector(unpack(inst, b_th), patterns)
-        d = float(np.max(np.abs(fa - fb)))
-        dp = abs(target_value_phi(unpack(inst, a_th), target)
-                 - target_value_phi(unpack(inst, b_th), target))
-        return (d < dist_tol and dp > phi_tol), d, dp, route
+        seed=rng_seed, tol=dist_tol)
+    phis = [ff.target_value(r, target[1]) for r in roots]
 
     best = {"found": False, "spread": 0.0, "pair": None}
     if len(roots) >= 2:
         hi_i = int(np.argmax(phis))
         lo_i = int(np.argmin(phis))
-        ok, d, dp, _ = check_pair(roots[lo_i], roots[hi_i], "A2_root_pair")
+        d = float(np.max(np.abs(
+            ff.fingerprint_values(roots[hi_i], patterns)
+            - ff.fingerprint_values(roots[lo_i], patterns))))
+        dp = abs(phis[hi_i] - phis[lo_i])
         best["spread"] = max(best["spread"], dp)
-        if ok:
+        if d < dist_tol and dp > phi_tol:
             best.update(found=True,
                         pair={"theta_a": [float(x) for x in roots[lo_i]],
                               "theta_b": [float(x) for x in roots[hi_i]],
@@ -95,15 +89,18 @@ def _model_pair(inst, theta_ref, target, patterns, cfg: dict, rng_seed: int):
                               "route": "A2_root_pair"})
             return best
     for rk in range(min(int(cfg.get("member_walk_follows", 4)), len(roots))):
-        w = manifold_walk(inst, roots[rk], target,
-                          n_seeds=int(cfg.get("member_walk_n_seeds", 10)),
-                          steps=int(cfg.get("member_walk_steps", 60)),
-                          seed=int(rng.integers(0, 2**31)))
+        w = fast_manifold_walk(inst, roots[rk], target,
+                               n_seeds=int(cfg.get("member_walk_n_seeds", 10)),
+                               steps=int(cfg.get("member_walk_steps", 60)),
+                               seed=rng_seed + 17 * (rk + 1),
+                               dist_tol=dist_tol, phi_tol=phi_tol)
         if w["success"] and w["theta_pair"] is not None:
             x2 = w["theta_pair"][1]
-            ok, d, dp, _ = check_pair(theta_ref, x2, "A2_manifold_follow")
+            d = float(np.max(np.abs(ff.fingerprint_values(x2, patterns)
+                                    - ff.fingerprint_values(theta_ref, patterns))))
+            dp = abs(ff.target_value(x2, target[1]) - phi_ref)
             best["spread"] = max(best["spread"], dp)
-            if ok:
+            if d < dist_tol and dp > phi_tol:
                 best.update(found=True,
                             pair={"theta_a": [float(x) for x in theta_ref],
                                   "theta_b": [float(x) for x in x2],
@@ -171,7 +168,9 @@ def evaluate_member(k: int, cfg: dict | None = None) -> dict:
         pass
 
     if not eng["gt_verdict"].startswith("UNDETERMINED"):
-        rec.update({"witnessed_discordant": False,
+        rec.update({"model_pair_found": False, "model_spread": None,
+                    "model_pair_route": None, "classical_witness": None,
+                    "witnessed_discordant": False,
                     "fail_reason": "engine_decided",
                     "wall_s": time.perf_counter() - t0})
         return rec

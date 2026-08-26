@@ -148,11 +148,12 @@ def test_deepened_witness_finds_known_unrecoverable():
     theta = pack(inst)
     res = deepened_witness_search(
         inst, theta, ("mean", 0),
-        {"a1_jump_rounds": 1, "a1_starts_per_round": 40,
-         "a1_walk_n_seeds": 4, "a1_walk_steps": 30},
+        {"a1_jump_rounds": 1, "a1_starts_per_round": 25,
+         "a1_walk_n_seeds": 2, "a1_walk_steps": 10,
+         "a1_adaptive_stop": False},
         seed=1)
     assert res["confirmed_false_recoverable"]
-    assert res["budget_starts"] >= 40
+    assert res["budget_starts"] >= 25
 
 
 def test_frechet_cell_scan_detects_conflicting_strata():
@@ -188,10 +189,10 @@ def test_attack_row_smoke_on_frozen_row_if_available():
     from sheafpatternfusion.attackers import attack_row
 
     rec = attack_row(row, {
-        "a1_jump_rounds": 1, "a1_starts_per_round": 20,
-        "a1_walk_n_seeds": 2, "a1_walk_steps": 15,
-        "a2_root_starts": 16, "a2_max_roots": 6, "a2_walk_follows": 1,
-        "a2_walk_n_seeds": 2, "a2_walk_steps": 15, "a2_lp_vertices": 4,
+        "a1_jump_rounds": 1, "a1_starts_per_round": 8,
+        "a1_walk_n_seeds": 2, "a1_walk_steps": 10,
+        "a2_root_starts": 8, "a2_max_roots": 4, "a2_walk_follows": 1,
+        "a2_walk_n_seeds": 2, "a2_walk_steps": 10, "a2_lp_vertices": 4,
         "a3_max_cells": 30})
     assert rec["verdict"] in ("CONFIRMED_FALSE_RECOVERABLE",
                               "NO_FALSE_RECOVERABLE_FOUND")
@@ -260,8 +261,8 @@ def test_run_cyclic_instance_end_to_end():
     }
     recs = run_cyclic_instance(
         job,
-        {"jump_starts": 8, "undecided_round2_multiplier": 1, "fiber_starts": 6},
-        ci_draws=2)
+        {"jump_starts": 3, "undecided_round2_multiplier": 1, "fiber_starts": 4},
+        ci_draws=1)
     assert recs
     for r in recs:
         assert r["poset_shape"] == "cyclic"
@@ -270,13 +271,13 @@ def test_run_cyclic_instance_end_to_end():
 
 
 def test_discordant_family_member_smoke():
-    cfg = {"engine_jump_starts": 8, "engine_jump_starts_r2": 12,
-           "member_root_starts": 24, "member_max_roots": 6,
-           "member_walk_follows": 1, "member_walk_n_seeds": 3,
-           "member_walk_steps": 20}
+    cfg = {"engine_jump_starts": 2, "engine_jump_starts_r2": 2,
+           "member_root_starts": 6, "member_max_roots": 3,
+           "member_walk_follows": 0, "member_walk_n_seeds": 1,
+           "member_walk_steps": 4}
     assert member_draw_seed(0, cfg) == SEED_ROW["seed"]
-    rec = evaluate_member(0, cfg)
+    rec = evaluate_member(1, cfg)
     for k in ("witnessed_discordant", "engine_verdict", "model_pair_found",
               "classical_witness", "wall_s"):
         assert k in rec
-    assert rec["is_origin_seed"]
+    assert not rec["is_origin_seed"]

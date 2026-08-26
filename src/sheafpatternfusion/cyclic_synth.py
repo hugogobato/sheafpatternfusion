@@ -137,9 +137,7 @@ def make_cyclic_jobs(cfg: dict, shard_idx: int = -1) -> tuple[list[dict], dict]:
                                    "rejection_n3": 0.20, "rejection_n4": 0.10})
     lo, hi = _shard_range(shard_idx, n_shards, max_attempts)
 
-    seen = set()
     jobs = []
-    attempts = 0
     stats = {"attempts": 0, "accepted": 0, "rejected_shape": 0,
              "rejected_no_target": 0, "duplicate": 0}
     for t in range(lo, hi):
@@ -154,11 +152,7 @@ def make_cyclic_jobs(cfg: dict, shard_idx: int = -1) -> tuple[list[dict], dict]:
         else:
             prop = TEMPLATES[name](seed_base * 31 + t)
             draw_seed = int(rng.integers(0, 2**31))
-        sig = signature(prop)
         stats["attempts"] += 1
-        if sig in seen:
-            stats["duplicate"] += 1
-            continue
         try:
             inst, patterns, shape = realize(prop, draw_seed)
         except Exception:
@@ -172,7 +166,6 @@ def make_cyclic_jobs(cfg: dict, shard_idx: int = -1) -> tuple[list[dict], dict]:
         if not partial:
             stats["rejected_no_target"] += 1
             continue
-        seen.add(sig)
         stats["accepted"] += 1
         jobs.append({
             "iid": f"cyc{inst.n_vars}_t{t:06d}",

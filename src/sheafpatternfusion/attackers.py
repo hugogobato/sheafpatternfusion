@@ -36,20 +36,259 @@ import time
 import numpy as np
 
 from .battery import frechet_bounds, instance_from_row
-from .engine2 import collect_roots_early
-from .lp_ground_truth import (
-    observed_vector,
-    pack,
-    root_jump_search,
-    target_value_phi,
-    unpack,
-    manifold_walk,
-)
+from .lp_ground_truth import pack, unpack
+
+
+class FastFingerprint:
+    """Vectorized evaluator of the observable fingerprint and mean targets.
+
+    Semantically identical to lp_ground_truth.observed_vector /
+    target_value_phi / MDAG.realized_patterns (same sorted-pattern ordering,
+    same product-order conditional keys, zero-mass conditional configs
+    dropped), but evaluates P(v) and P(r|v) for all 2^n configurations at
+    once. This is the attackers' own evaluation path: deliberately NOT the
+    certificate's evaluator."""
+
+    def __init__(self, inst):
+        import itertools as _it
+
+        self.n = inst.n_vars
+        vs = list(_it.product((0, 1), repeat=self.n))
+        v_arr = np.array(vs)
+        n_v = len(vs)
+        self.var_sel = []
+        for i in range(self.n):
+            sels = []
+            for k in inst.var_cpt[i].keys():
+                sel = np.ones(n_v, dtype=bool)
+                for loc, pi in enumerate(inst.var_parents[i]):
+                    sel &= v_arr[:, pi] == k[loc]
+                sels.append(sel)
+            self.var_sel.append(sels)
+        self.r_sel = []
+        for i in range(self.n):
+            sels = []
+            for k in inst.r_cpt[i].keys():
+                sel = np.ones(n_v, dtype=bool)
+                for loc, pi in enumerate(inst.r_parents[i]):
+                    sel &= v_arr[:, pi] == k[loc]
+                sels.append(sel)
+            self.r_sel.append(sels)
+
+        r_all = list(_it.product((0, 1), repeat=self.n))
+        self._r_index = {r: int("".join(map(str, r)), 2) for r in r_all}
+        self._bits = np.array(r_all)
+        self._pattern_info = {}
+        for r in r_all:
+            obs = tuple(i for i in range(self.n) if r[i] == 1)
+            row = self._r_index[r]
+            if not obs:
+                self._pattern_info[r] = {"row": row, "obs": (), "groups": []}
+                continue
+            cols = v_arr[:, obs]
+            keys = sorted({tuple(int(x) for x in cols[k])
+                           for k in range(n_v)})
+            groups = []
+            for key in keys:
+                mask = np.ones(n_v, dtype=bool)
+                for loc, pi in enumerate(obs):
+                    mask &= v_arr[:, pi] == key[loc]
+                groups.append((np.flatnonzero(mask)))
+            self._pattern_info[r] = {"row": row, "obs": obs, "groups": groups}
+        self._v_arr_j = None
+
+    def probs(self, theta: np.ndarray):
+        n_v = 2 ** self.n
+        bits = self._bits
+        pv = np.ones(n_v)
+        idx = 0
+        for i in range(self.n):
+            col = np.zeros(n_v)
+            for ki, sel in enumerate(self.var_sel[i]):
+                col[sel] = theta[idx + ki]
+            idx += len(self.var_sel[i])
+            pv *= np.where(bits[:, i] == 1, col, 1.0 - col)
+        qr = np.ones((n_v, n_v))
+        for i in range(self.n):
+            col = np.zeros(n_v)
+            for ki, sel in enumerate(self.r_sel[i]):
+                col[sel] = theta[idx + ki]
+            idx += len(self.r_sel[i])
+            qr *= np.where(bits[:, i][:, None] == 1,
+                           col[None, :], 1.0 - col[None, :])
+        return pv, qr
+
+    def realized_patterns(self, theta: np.ndarray) -> list[tuple]:
+        pv, qr = self.probs(theta)
+        pr = qr @ pv
+        out = [r for r, ri in self._r_index.items() if pr[ri] > 0]
+        return sorted(out)
+
+    def fingerprint(self, theta: np.ndarray,
+                    patterns: list[tuple]) -> tuple[np.ndarray, list]:
+        """(values, keys) mirroring observed_vector's key ordering."""
+        pv, qr = self.probs(theta)
+        pr = qr @ pv
+        vals, keys = [], []
+        for r in patterns:
+            info = self._pattern_info[r]
+            mass = float(pr[info["row"]])
+            keys.append(("pat", r))
+            vals.append(mass)
+            if not info["obs"]:
+                keys.append((r, ()))
+                vals.append(1.0)
+                continue
+            w = qr[info["row"]] * pv
+            tot = float(w.sum())
+            for gi, idxs in enumerate(info["groups"]):
+                agg = float(w[idxs].sum()) if tot > 0 else 0.0
+                val = agg / tot if tot > 0 else 0.0
+                key = tuple(int(x) for x in format(gi, f"0{len(info['obs'])}b"))
+                keys.append((r, key))
+                vals.append(val)
+        return np.array(vals), keys
+
+    def fingerprint_values(self, theta: np.ndarray,
+                           patterns: list[tuple]) -> np.ndarray:
+        return self.fingerprint(theta, patterns)[0]
+
+    def target_value(self, theta: np.ndarray, j: int) -> float:
+        pv, _ = self.probs(theta)
+        return float(pv @ self._bits[:, j])
+
+
+def _free_mask(inst):
+    lo, hi = param_bounds_public(inst)
+    free = np.where(hi - lo > 0)[0]
+    return free, lo, hi
+
+
+def collect_roots_fast(inst, theta_ref: np.ndarray, patterns, n_starts: int,
+                       max_roots: int, seed: int, tol: float = 1e-9,
+                       ls_tol: float = 1e-13) -> list[np.ndarray]:
+    """engine2.collect_roots_early semantics on the FastFingerprint path:
+    full start budget unless max_roots distinct roots found (no
+    duplicate-streak early stopping), distinctness at 1e-6."""
+    from scipy.optimize import least_squares
+
+    ff = FastFingerprint(inst)
+    f_ref = ff.fingerprint_values(theta_ref, patterns)
+    base = pack(inst)
+    free, lo, hi = _free_mask(inst)
+    roots = []
+    if len(free) == 0:
+        return [base]
+    rng = np.random.default_rng(seed)
+    span = hi[free] - lo[free]
+
+    def resid(xf):
+        t = base.copy()
+        t[free] = xf
+        return ff.fingerprint_values(t, patterns) - f_ref
+
+    for _ in range(n_starts):
+        x0f = lo[free] + 0.02 * span + rng.random(len(free)) * (0.96 * span)
+        res = least_squares(resid, x0f, bounds=(lo[free], hi[free]),
+                            xtol=ls_tol, ftol=ls_tol, gtol=ls_tol)
+        if not np.all(np.isfinite(res.x)):
+            continue
+        t = base.copy()
+        t[free] = res.x
+        if float(np.max(np.abs(ff.fingerprint_values(t, patterns)
+                                    - f_ref))) >= tol:
+            continue
+        if all(np.max(np.abs(t - u)) > 1e-6 for u in roots):
+            roots.append(t.copy())
+            if len(roots) >= max_roots:
+                break
+    return roots
+
+
+def fast_manifold_walk(inst, theta_ref: np.ndarray, target,
+                       n_seeds: int = 12, steps: int = 60,
+                       step_size: float = 0.02, seed: int = 0,
+                       dist_tol: float = 1e-9, refresh_every: int = 5,
+                       phi_tol: float = 1e-4) -> dict:
+    """lp_ground_truth.manifold_walk semantics (null-space predictor +
+    first-order corrector, maximizing |dphi|) on the FastFingerprint path
+    with Jacobian refreshes every `refresh_every` steps."""
+    ff = FastFingerprint(inst)
+    patterns = ff.realized_patterns(theta_ref)
+    f_ref = ff.fingerprint_values(theta_ref, patterns)
+    phi_ref = ff.target_value(theta_ref, target[1])
+    base = pack(inst)
+    free, lo_m, hi_m = _free_mask(inst)
+    if len(free) == 0:
+        return {"delta_phi": 0.0, "dist": np.inf, "success": False,
+                "theta_pair": None}
+
+    def full_vec(theta_free):
+        t = theta_ref.copy()
+        t[free] = theta_free
+        return t
+
+    def f_of_theta(t):
+        return ff.fingerprint_values(t, patterns)
+
+    J0 = _fast_jacobian(ff, base, patterns, f_ref, free)
+    U, S, Vt = np.linalg.svd(J0, full_matrices=True)
+    r = int(np.sum(S > 1e-8))
+    Null = Vt[r:].T if r < Vt.shape[1] else np.zeros((len(free), 0))
+    Jp = np.linalg.pinv(J0)
+
+    best = {"delta_phi": 0.0, "dist": np.inf, "success": False,
+            "theta_pair": None}
+    rng = np.random.default_rng(seed)
+    for k in range(n_seeds):
+        d = Null[:, k % Null.shape[1]] if Null.size else None
+        if d is None:
+            break
+        x = base[free].copy()
+        sign = 1.0 if rng.random() < 0.5 else -1.0
+        for step in range(steps):
+            x = x + sign * step_size * d / max(float(np.linalg.norm(d)), 1e-12)
+            x = np.clip(x, lo_m[free], hi_m[free])
+            for _ in range(3):
+                fx = f_of_theta(full_vec(x))
+                x = x - Jp @ (fx - f_ref)
+                x = np.clip(x, lo_m[free], hi_m[free])
+            fx = f_of_theta(full_vec(x))
+            dist = float(np.max(np.abs(fx - f_ref)))
+            if dist > 1e-7:
+                break
+            t = full_vec(x)
+            dphi = abs(ff.target_value(t, target[1]) - phi_ref)
+            if dist < dist_tol and dphi > best["delta_phi"]:
+                best = {"delta_phi": float(dphi), "dist": dist,
+                        "success": bool(dphi > phi_tol),
+                        "theta_pair": (theta_ref.copy(), t.copy())}
+            if (step + 1) % refresh_every == 0:
+                Jx = _fast_jacobian(ff, t, patterns, f_ref, free)
+                _, Sx, Vtx = np.linalg.svd(Jx, full_matrices=True)
+                rx = int(np.sum(Sx > 1e-8))
+                if rx < Vtx.shape[1]:
+                    Null = np.hstack([Null, Vtx[rx:].T])
+    return best
+
+
+def _fast_jacobian(ff, theta, patterns, f_ref, free, eps: float = 1e-6):
+    cols = []
+    for idx in free:
+        tp = theta.copy()
+        tp[idx] += eps
+        tm = theta.copy()
+        tm[idx] -= eps
+        fp = ff.fingerprint_values(tp, patterns)
+        fm = ff.fingerprint_values(tm, patterns)
+        cols.append((fp - fm) / (2 * eps))
+    return np.column_stack(cols) if cols else np.zeros((len(f_ref), 0))
 
 
 def deepened_witness_search(inst, theta_ref: np.ndarray, target,
                             cfg: dict, seed: int) -> dict:
-    """A1: escalating root-jump rounds + randomized manifold walks."""
+    """A1: escalating root-jump rounds + randomized manifold walks on the
+    attackers' own evaluation path."""
     t0 = time.perf_counter()
     rounds = int(cfg.get("a1_jump_rounds", 3))
     starts_per_round = int(cfg.get("a1_starts_per_round", 200))
@@ -58,14 +297,18 @@ def deepened_witness_search(inst, theta_ref: np.ndarray, target,
     phi_tol = float(cfg.get("phi_tol", 1e-4))
     dist_tol = float(cfg.get("dist_tol", 1e-9))
 
+    ff = FastFingerprint(inst)
+    patterns = ff.realized_patterns(theta_ref)
     best = {"delta_phi": 0.0, "dist": np.inf}
     starts_used = 0
     confirmed = None
     rng = np.random.default_rng(seed)
     for rnd in range(rounds):
-        res = root_jump_search(inst, theta_ref, target,
-                               n_starts=starts_per_round,
-                               seed=int(rng.integers(0, 2**31)))
+        round_start_best = best["delta_phi"]
+        res = fast_root_jump_search(inst, theta_ref, target,
+                                    n_starts=starts_per_round,
+                                    seed=int(rng.integers(0, 2**31)),
+                                    dist_tol=dist_tol, phi_tol=phi_tol)
         starts_used += starts_per_round
         if res["delta_phi"] > best["delta_phi"]:
             best = {"delta_phi": res["delta_phi"], "dist": res["dist"]}
@@ -74,16 +317,24 @@ def deepened_witness_search(inst, theta_ref: np.ndarray, target,
                          "theta_pair": res["theta_pair"],
                          "phi_values": res["phi_values"]}
             break
-        walk = manifold_walk(inst, theta_ref, target,
-                             n_seeds=walk_seeds, steps=walk_steps,
-                             step_size=float(cfg.get("a1_step_size", 0.02)),
-                             seed=int(rng.integers(0, 2**31)))
+        walk = fast_manifold_walk(inst, theta_ref, target,
+                                  n_seeds=walk_seeds, steps=walk_steps,
+                                  step_size=float(cfg.get("a1_step_size", 0.02)),
+                                  seed=int(rng.integers(0, 2**31)),
+                                  dist_tol=dist_tol, phi_tol=phi_tol)
         if walk["delta_phi"] > best["delta_phi"]:
             best = {"delta_phi": walk["delta_phi"], "dist": walk["dist"]}
         if walk["success"]:
             confirmed = {"route": f"A1_manifoldwalk_r{rnd}",
                          "theta_pair": walk["theta_pair"],
-                         "phi_values": walk["phi_values"]}
+                         "phi_values": None}
+            if walk["theta_pair"] is not None:
+                a, b = walk["theta_pair"]
+                confirmed["phi_values"] = (
+                    ff.target_value(a, target[1]), ff.target_value(b, target[1]))
+            break
+        if cfg.get("a1_adaptive_stop", True) and \
+                best["delta_phi"] <= 1.1 * round_start_best:
             break
     return {
         "attacker": "A1_deepened_witness",
@@ -147,8 +398,8 @@ def _lp_vertex_harvest(n_vars: int, q: dict, pp: dict, target,
 def completion_enumeration(inst, theta_ref: np.ndarray, target,
                            cfg: dict, seed: int) -> dict:
     """A2: fresh-seed root enumeration + manifold continuations + LP vertex
-    harvest. Model-valid kill requires two enumerated roots differing on the
-    target within tolerances."""
+    harvest on the FastFingerprint path. Model-valid kill requires two
+    enumerated completions differing on the target within tolerances."""
     t0 = time.perf_counter()
     rng = np.random.default_rng(seed)
     root_starts = int(cfg.get("a2_root_starts", 400))
@@ -158,52 +409,55 @@ def completion_enumeration(inst, theta_ref: np.ndarray, target,
     phi_tol = float(cfg.get("phi_tol", 1e-4))
     dist_tol = float(cfg.get("dist_tol", 1e-9))
 
-    m_ref = unpack(inst, theta_ref)
-    patterns = m_ref.realized_patterns(jt=m_ref.joint_table())
-    f_ref, _ = observed_vector(m_ref, patterns)
-    phi_ref = target_value_phi(m_ref, target)
-    roots = collect_roots_early(inst, theta_ref, patterns,
-                                n_starts=root_starts, max_roots=max_roots,
-                                seed=int(rng.integers(0, 2**31)))
-    phis = [target_value_phi(unpack(inst, r), target) for r in roots]
+    ff = FastFingerprint(inst)
+    patterns = ff.realized_patterns(theta_ref)
+    f_ref = ff.fingerprint_values(theta_ref, patterns)
+    phi_ref = ff.target_value(theta_ref, target[1])
+    roots = collect_roots_fast(inst, theta_ref, patterns,
+                               n_starts=root_starts, max_roots=max_roots,
+                               seed=int(rng.integers(0, 2**31)),
+                               tol=dist_tol)
+    phis = [ff.target_value(r, target[1]) for r in roots]
 
     confirmed = None
     spread_model = 0.0
     if len(roots) >= 2:
-        hi = int(np.argmax(phis))
-        lo = int(np.argmin(phis))
-        f_hi, _ = observed_vector(unpack(inst, roots[hi]), patterns)
-        f_lo, _ = observed_vector(unpack(inst, roots[lo]), patterns)
-        pair_dist = float(np.max(np.abs(f_hi - f_lo)))
-        spread_model = abs(phis[hi] - phis[lo])
+        hi_i = int(np.argmax(phis))
+        lo_i = int(np.argmin(phis))
+        pair_dist = float(np.max(np.abs(
+            ff.fingerprint_values(roots[hi_i], patterns)
+            - ff.fingerprint_values(roots[lo_i], patterns))))
+        spread_model = abs(phis[hi_i] - phis[lo_i])
         if pair_dist < dist_tol and spread_model > phi_tol:
             confirmed = {"route": "A2_root_pair",
-                         "theta_pair": (roots[lo], roots[hi]),
-                         "phi_values": (phis[lo], phis[hi])}
+                         "theta_pair": (roots[lo_i], roots[hi_i]),
+                         "phi_values": (phis[lo_i], phis[hi_i])}
 
     walks_used = 0
-    if confirmed is None:
+    if confirmed is None and roots:
         order = np.argsort([-abs(p - phi_ref) for p in phis])
         for rk in [int(k) for k in order[:walk_follows]]:
-            w = manifold_walk(inst, roots[rk], target,
-                              n_seeds=walk_seeds,
-                              steps=int(cfg.get("a2_walk_steps", 60)),
-                              seed=int(rng.integers(0, 2**31)))
+            w = fast_manifold_walk(inst, roots[rk], target,
+                                   n_seeds=walk_seeds,
+                                   steps=int(cfg.get("a2_walk_steps", 60)),
+                                   seed=int(rng.integers(0, 2**31)),
+                                   dist_tol=dist_tol, phi_tol=phi_tol)
             walks_used += 1
             if w["success"] and w["theta_pair"] is not None:
                 x2 = w["theta_pair"][1]
-                f2, _ = observed_vector(unpack(inst, x2), patterns)
-                d2 = float(np.max(np.abs(f2 - f_ref)))
-                dp2 = abs(target_value_phi(unpack(inst, x2), target) - phi_ref)
+                d2 = float(np.max(np.abs(ff.fingerprint_values(x2, patterns)
+                                         - f_ref)))
+                dp2 = abs(ff.target_value(x2, target[1]) - phi_ref)
                 if d2 < dist_tol and dp2 > phi_tol:
                     confirmed = {"route": "A2_manifold_follow",
                                  "theta_pair": (theta_ref.copy(), x2),
                                  "phi_values": (phi_ref,
-                                                target_value_phi(unpack(inst, x2), target))}
+                                                ff.target_value(x2, target[1]))}
                     break
                 if dp2 > spread_model:
                     spread_model = dp2
 
+    m_ref = unpack(inst, theta_ref)
     jt = m_ref.joint_table()
     q = m_ref.observed_laws(jt)
     pp = {}
@@ -380,6 +634,64 @@ def _stable_seed(row: dict, tag: str) -> int:
     import zlib
     payload = (row["instance_id"] + "|" + json.dumps(row["target"]) + "|" + tag)
     return zlib.crc32(payload.encode()) % 2**31
+
+
+def fast_root_jump_search(inst, theta_ref: np.ndarray, target,
+                          n_starts: int, seed: int,
+                          dist_tol: float = 1e-9,
+                          phi_tol: float = 1e-4) -> dict:
+    """Attackers' own multistart least-squares root finder on the observable
+    fingerprint (FastFingerprint evaluation path). Same acceptance semantics
+    as lp_ground_truth.root_jump_search: a distinct factorized model matching
+    the reference fingerprint within dist_tol whose target differs by more
+    than phi_tol certifies model-unrecoverability."""
+    from scipy.optimize import least_squares
+
+    ff = FastFingerprint(inst)
+    patterns = ff.realized_patterns(theta_ref)
+    f_ref = ff.fingerprint_values(theta_ref, patterns)
+    phi_ref = ff.target_value(theta_ref, target[1] if target[0] == "mean"
+                              else target[1])
+    lo, hi = param_bounds_public(inst)
+    free = np.where(hi - lo > 0)[0]
+    base = theta_ref.copy()
+    best = {"delta_phi": 0.0, "dist": np.inf, "success": False,
+            "theta_pair": None, "phi_values": None}
+    if len(free) == 0:
+        return best
+    rng = np.random.default_rng(seed)
+    span = hi[free] - lo[free]
+    for _ in range(n_starts):
+        x0f = lo[free] + 0.02 * span + rng.random(len(free)) * (0.96 * span)
+
+        def resid(xf):
+            t = base.copy()
+            t[free] = xf
+            return ff.fingerprint_values(t, patterns) - f_ref
+
+        res = least_squares(resid, x0f, bounds=(lo[free], hi[free]),
+                            xtol=1e-13, ftol=1e-13, gtol=1e-13)
+        if not np.all(np.isfinite(res.x)):
+            continue
+        t = base.copy()
+        t[free] = res.x
+        dist = float(np.max(np.abs(ff.fingerprint_values(t, patterns) - f_ref)))
+        if dist >= dist_tol:
+            continue
+        dphi = abs(ff.target_value(t, target[1]) - phi_ref)
+        if dphi > best["delta_phi"]:
+            best = {"delta_phi": float(dphi), "dist": dist,
+                    "success": bool(dphi > phi_tol),
+                    "theta_pair": (theta_ref.copy(), t.copy()),
+                    "phi_values": (float(phi_ref), float(ff.target_value(t, target[1])))}
+            if best["delta_phi"] > 0.5:
+                break
+    return best
+
+
+def param_bounds_public(inst):
+    from .lp_ground_truth import param_bounds
+    return param_bounds(inst)
 
 
 def _serialize_witness(result: dict):

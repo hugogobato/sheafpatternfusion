@@ -132,7 +132,14 @@ def build_audit_frame(srs_seed: int, srs_n: int, include_s_star: bool):
         e["_strata"].append("n3_srs")
     if include_s_star:
         pf = OUT / "priority_sample.jsonl"
-        if pf.exists():
+        if not pf.exists():
+            from sheafpatternfusion.workers import build_s_star_ids
+            print("[audit] priority_sample.jsonl missing; recomputing S* inline")
+            want = {}
+            battery_cfg = load_cfg("battery")
+            for key in build_s_star_ids(load_frozen_rows(), battery_cfg):
+                want[key] = "recomputed_inline"
+        else:
             want = {}
             for line in pf.read_text().splitlines():
                 try:
@@ -140,13 +147,11 @@ def build_audit_frame(srs_seed: int, srs_n: int, include_s_star: bool):
                     want[rec["instance_id"] + "|" + json.dumps(rec["target"])] = rec["reason"]
                 except Exception:
                     pass
-            for r in rows:
-                key = row_key(r)
-                if key in want:
-                    e = frame.setdefault(key, dict(r, _strata=[]))
-                    e["_strata"].append("S_star:" + want[key])
-        else:
-            print("[audit] WARNING: priority_sample.jsonl missing; run battery first")
+        for r in rows:
+            key = row_key(r)
+            if key in want:
+                e = frame.setdefault(key, dict(r, _strata=[]))
+                e["_strata"].append("S_star:" + want[key])
     return [frame[k] for k in sorted(frame.keys())]
 
 
