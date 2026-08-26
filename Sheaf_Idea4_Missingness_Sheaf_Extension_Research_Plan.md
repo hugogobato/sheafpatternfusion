@@ -452,10 +452,13 @@ Environment lock (`requirements.txt` with versions) frozen at end of Phase 1; ev
 
 Status: items 1-5 below were the Phase-1 program and are COMPLETE (G0/G1/G2 all GO; Phases 2, 2.5 also complete). The current immediate actions are:
 
-1. **WP3.0a** natural-prevalence scan (3 days, local) -> `results/phase3/prevalence_scan.{json,csv}`.
-2. **WP3.0b+c** scaling + signal-validity probes (<= 7 days, 1-2 Colab shards at tag `v0.3.0`) -> `results/phase3/scaling_probe.*`, `signal_validity.*`.
-3. Gate **G2.6** adjudication memo (`results/phase3/gate_G26_memo.md`): >=2/3 GO proceeds to WP3.1'; otherwise boundary-paper exit per Appendix A.
-4. Only after G2.6 GO: WP3.1' hazard-E memo plus the written win-prediction; then WP3.2'.
+1. **WP3.0a** natural-prevalence scan -> `results/phase3/prevalence_scan.{json,csv}` (Colab notebook `nb30_a_prevalence.ipynb`; standalone).
+2. **WP3.0b** scaling probe (n=5 primary, n=6 descriptive arm; unchanged Phase-2 budgets) -> `results/phase3/scaling_probe.*` (12 scaling shards, self-contained; rescoped 2026-08-26 after the mandatory pilot priced n=5 rows at ~1.0-1.6 core-h — scope 216 structures vs original `>=400`, instrument unchanged, deviation recorded in `configs/phase3/scaling.json` and `docs/phase3_protocol.md`).
+3. **WP3.0c** signal-validity probe -> `results/phase3/signal_validity.*` (4 cycattack shards + 1 signal-analysis notebook; runs PARTIAL on existing assets and upgrades to FINAL when the fleet coalesces).
+4. Gate **G2.6** adjudication memo (`results/phase3/gate_G26_memo.md`): >=2/3 GO proceeds to WP3.1'; otherwise boundary-paper exit per Appendix A.
+5. Only after G2.6 GO: WP3.1' hazard-E memo plus the written win-prediction; then WP3.2'.
+
+> 2026-08-26: WP3.0 fleet launched. Notebooks: `notebooks_colab/phase3/` (18 self-contained CPU notebooks; `MANIFEST.json` enumerates expected outputs; `notebooks_colab/phase3/incoming/` is the collection landing zone). Frozen configs `configs/phase3/{prevalence,scaling,signal}.json` and helper module `src/sheafpatternfusion/phase3_probe.py` are committed; rescoped scaling config documents the pilot-gated deviation per Research Plan Section 11. Next gates are WPs 3.0a/b/c (feeds G2.6); nothing beyond that gate is scheduled until it returns its verdict.
 
 Original Phase-1 list (historical):
 

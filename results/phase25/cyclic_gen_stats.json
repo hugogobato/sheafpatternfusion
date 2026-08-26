@@ -1,0 +1,48 @@
+{
+ "shards": [
+  {
+   "generation": {
+    "attempts": 199,
+    "accepted": 140,
+    "rejected_shape": 59,
+    "rejected_no_target": 0,
+    "duplicate": 0
+   },
+   "ran": 140,
+   "mismatch_instances": 100
+  },
+  {
+   "generation": {
+    "attempts": 188,
+    "accepted": 140,
+    "rejected_shape": 48,
+    "rejected_no_target": 0,
+    "duplicate": 0
+   },
+   "ran": 140,
+   "mismatch_instances": 94
+  },
+  {
+   "generation": {
+    "attempts": 191,
+    "accepted": 140,
+    "rejected_shape": 51,
+    "rejected_no_target": 0,
+    "duplicate": 0
+   },
+   "ran": 140,
+   "mismatch_instances": 95
+  },
+  {
+   "generation": {
+    "attempts": 198,
+    "accepted": 140,
+    "rejected_shape": 58,
+    "rejected_no_target": 0,
+    "duplicate": 0
+   },
+   "ran": 140,
+   "mismatch_instances": 100
+  }
+ ]
+}

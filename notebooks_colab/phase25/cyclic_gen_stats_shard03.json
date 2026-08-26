@@ -1,0 +1,11 @@
+{
+ "generation": {
+  "attempts": 198,
+  "accepted": 140,
+  "rejected_shape": 58,
+  "rejected_no_target": 0,
+  "duplicate": 0
+ },
+ "ran": 140,
+ "mismatch_instances": 100
+}

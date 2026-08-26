@@ -1,0 +1,139 @@
+{
+ "date": "2026-08-26",
+ "runner": "12 Colab thin-runner notebooks @ tag v0.3.0",
+ "WP2_5_1_battery": {
+  "population_rows": 2192,
+  "N0_accuracy": 0.9995437956204379,
+  "pre_registered_expectation": "N0 >= 99.9% by construction",
+  "N3_best": {
+   "tau": 0.45,
+   "TP": 641,
+   "TN": 0,
+   "FP": 1,
+   "FN": 1550,
+   "accuracy": 0.29242700729927007
+  },
+  "frechet_width_median_by_n": {
+   "n=2": 0.5056990399477364,
+   "n=3": 0.5010204861040859,
+   "n=4": 0.5045241406196564
+  },
+  "S_star_size": 200,
+  "gate_G2_5a": "quantified as pre-registered; N0 reproduces 99.95% of certificate labels; S* nonempty -> D1 demotion NOT triggered"
+ },
+ "WP2_5_2_audit": {
+  "frame_unique_rows": 901,
+  "verdicted_unique_rows": 899,
+  "missing_rows": [
+   "n4_r0199_d0|[\"mean\", 0]",
+   "n4_r0199_d0|[\"mean\", 1]"
+  ],
+  "confirmed_false_recoverable": 0,
+  "clean": 899,
+  "strata_verdicted_rows": {
+   "n2_census": 62,
+   "S_star": 200,
+   "n3_srs": 400,
+   "n4_census": 317
+  },
+  "rule_of_three_upper_bounds": {
+   "pooled": 0.0033,
+   "n2_census": 0.0484,
+   "n4_census_partial317": 0.0095,
+   "n3_srs": 0.0075,
+   "S_star": 0.015
+  },
+  "A1_starts_median": 400.0,
+  "A2_model_spread_max": 1.3702194934239742e-10,
+  "A2_phi_tol": 0.0001,
+  "A3_rows_with_infeasible_cells": "899/899",
+  "compute_hours": {
+   "A1": 42.72,
+   "A2": 10.89,
+   "A3": 0.07,
+   "total": 53.68
+  },
+  "gate_G2_5b": "PASS - zero confirmed false RECOVERABLE across censused+sampled strata; C1 survives with pooled bound <= 0.33% (pending 2-row patch to complete n4 census)"
+ },
+ "WP2_5_3_family": {
+  "members": 120,
+  "engine_decided_members": 110,
+  "engine_undecided_members": 10,
+  "witnessed_discordant": 3,
+  "success_threshold": 10,
+  "witness_detail": [
+   {
+    "member_id": 51,
+    "route": "A2_root_pair",
+    "classical_witness": "mass_family_lp_infeasible",
+    "delta_phi": 0.000112
+   },
+   {
+    "member_id": 93,
+    "route": "A2_root_pair",
+    "classical_witness": "mass_family_lp_infeasible",
+    "delta_phi": 0.000185
+   },
+   {
+    "member_id": 103,
+    "route": "A2_root_pair",
+    "classical_witness": "mass_family_lp_infeasible",
+    "delta_phi": 0.000131
+   }
+  ],
+  "origin_seed_member0_witnessed": false,
+  "gate_G2_5d": "COLLAPSE - 3/10 undecided members witnessed (threshold >= 10); theory-note path NOT authorized; fold into limitations"
+ },
+ "WP2_5_4_cyclic": {
+  "instances": 560,
+  "target_rows": 1120,
+  "poset_shape_all_cyclic": true,
+  "attempts_total": 776,
+  "accepted_total": 560,
+  "honest_attempt_floor_per_shard": 50,
+  "min_accepted_per_shard": 140,
+  "decidable_rows": 336,
+  "confusion": {
+   "TP": 0,
+   "TN": 336,
+   "FP": 0,
+   "FN": 0
+  },
+  "decidable_agreement": 1.0,
+  "unexplained_mismatch_rate_decidable": 0.0,
+  "engine_undecided_rows": 784,
+  "sheaf_on_undecided": {
+   "RECOVERABLE": 784
+  },
+  "obstruction_signature_fraction_nonzero_fiber_spread": 0.3,
+  "jacobian_full_rank_rate_undecided": 1.0,
+  "mechanism_classes": {
+   "MNAR_other": 1118,
+   "MNAR_self": 2
+  },
+  "gate_G2_5c": "PASS - agreement 100% (>=98%) on decidable rows AND obstruction signature strictly inside (0%,100%); D4 floor met (140/shard accepted); cohomology vocabulary retained"
+ },
+ "WP2_5_6_pricing": {
+  "n2": {
+   "cert_pipeline_med_s": 3.118,
+   "cert_pipeline_k": 44,
+   "attack_med_s": 18.819760758999138,
+   "attack_k": 62,
+   "ratio_attack_over_cert": 6.04
+  },
+  "n3": {
+   "cert_pipeline_med_s": 71.8615,
+   "cert_pipeline_k": 68,
+   "attack_med_s": 74.22369644749995,
+   "attack_k": 520,
+   "ratio_attack_over_cert": 1.03
+  },
+  "note": "apples-to-apples on engine-undecided rows: certificate pipeline (engine rounds + fiber) vs full attack battery; >=10x triage bar NOT met at n=3 (~1x). Decidable-region ratios look better but are not the triage population.",
+  "verdict": "triage story not supported as measured; recorded per pre-registration regardless of G2.5b PASS"
+ },
+ "demotion_rules": {
+  "D1_not_triggered": "S* nonempty (200)",
+  "D2_KILL_not_triggered": "zero confirmed false RECOVERABLE",
+  "D4_not_triggered": "140 accepted/shard vs floor 50"
+ }
+}

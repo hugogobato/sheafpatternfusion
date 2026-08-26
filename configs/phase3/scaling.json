@@ -1,0 +1,75 @@
+{
+  "description": "WP3.0b scaling probe (n=5 primary, n=6 descriptive arm). Frozen 2026-08-26, REVISED SAME DAY after the mandatory one-seed pilot priced full-budget n=5 engine rows at ~1.0-1.6 core-hours each (least-squares witness search dominates; measured splits: tiny-budget r1 ~55-80 s at 4 starts, fiber ~110 s at 6 starts -> linear extrapolation to the unchanged Phase-2 budgets gives 65-95 min per undecided target row). The original 480-structure target (plan text '>= 400') is COMPUTE-INFEASIBLE inside the Colab envelope (~480 core-hours); per plan Section 11 pilot-gating, scope is adjusted BEFORE any run while keeping INSTRUMENT BUDGETS IDENTICAL to Phase 2 (round1 jump_starts=40 seed 11 with its seed+101 fallback walk; undecided round2 x2 multiplier seeds 23/124; fiber 48 starts max_roots 12 seed 13). New scope: 216 structures x 1 draw (2160-row order-of-magnitude corrected below) across 12 shards, giving ~+-7-8 pp binomial CI on a p=0.5 decidability rate; un-run job ids are logged by the deadline guard and can feed a follow-up wave. Deviation recorded in the G2.6 memo template.",
+  "shards": 12,
+  "design": {
+    "n5_structures_total": 216,
+    "n5_structures_per_shard": 18,
+    "draws_per_structure": 1,
+    "n4_retime_per_shard": 4,
+    "n6_pilot_per_shard": 1,
+    "n6_arm_note": "trailing block per shard; each n6 job individually deadline-checked; pre-registration reads n=5 for both GO arms, n=6 is descriptive",
+    "attack_quota_per_shard": 6,
+    "attack_srs": "seeded rng(attack_seed_base + shard_idx) without replacement over the shard's undecided-x-RECOVERABLE target keys, sorted deterministically"
+  },
+  "budgets": {
+    "jump_starts": 40,
+    "round2_multiplier": 2,
+    "fiber_starts": 48,
+    "max_roots": 12,
+    "ci_discovery_draws": 16,
+    "lp_pinch_tol": 1e-09,
+    "lp_width_tol": 0.001,
+    "spread_tol": 1e-06
+  },
+  "attack": {
+    "a1_jump_rounds": 1,
+    "a1_starts_per_round": 24,
+    "a1_walk_n_seeds": 4,
+    "a1_walk_steps": 30,
+    "a1_step_size": 0.02,
+    "a2_root_starts": 32,
+    "a2_max_roots": 8,
+    "a2_walk_follows": 1,
+    "a2_walk_n_seeds": 4,
+    "a2_walk_steps": 25,
+    "a2_lp_vertices": 8,
+    "a3_max_union_vars": 4,
+    "a3_max_cells": 40,
+    "a3_pin_tol": 1e-09,
+    "phi_tol": 0.0001,
+    "dist_tol": 1e-09
+  },
+  "deadlines": {
+    "soft_wall_s": 28800,
+    "note": "stop launching new jobs once elapsed exceeds soft_wall_s; running jobs drain, queued ones are cancelled and reported in the shard summary (Colab hard limit ~12 h)",
+    "stall_timeout_s": 3600,
+    "n6_gate_elapsed_s": 21600
+  },
+  "seeds": {
+    "structure_seed_base_n5": 20400901,
+    "structure_seed_base_n4retime": 20410901,
+    "structure_seed_base_n6": 20420901,
+    "draw_seed_base": 20430901,
+    "attack_srs_seed_base": 20440901
+  },
+  "pre_registered_readings": {
+    "GO_feasibility_decidability_min_n5": 0.5,
+    "GO_economics_ratio_min": 3.0,
+    "GO_economics_trend": "ratio strictly increasing from n=4 to n=5 (ratio = median attack wall / median certificate-pipeline wall [engine r1+r2+fiber] on undecided rows)",
+    "baseline_ratios_phase25": {
+      "n2": 6.0,
+      "n3": 1.03
+    },
+    "baseline_decidability_phase2_merge": "recomputed from data/frozen/instances_merged.jsonl inside each notebook"
+  },
+  "outputs": [
+    "results/phase3/scaling_probe_shardXX.jsonl",
+    "results/phase3/scaling_attacks_shardXX.jsonl",
+    "results/phase3/scaling_summary_shardXX.json"
+  ],
+  "compute_projection": {
+    "per_structure_expected_core_h": "0.9-1.4 (mix-dependent: formula/pinch rows are seconds)",
+    "per_shard_expected_wall_h": "~8-10 including re-timing and attacks; deadline-guarded",
+    "fleet_total_core_h": "~200-250"
+  }
+}

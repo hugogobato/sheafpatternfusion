@@ -1,0 +1,19 @@
+{
+ "collected_at": "2026-08-26 11:01 -03",
+ "search_roots": [
+  "/home/hugo_souto/Stuff/Research/sheafpatternfusion/notebooks_colab/phase3/incoming",
+  "/home/hugo_souto/Stuff/Research/sheafpatternfusion/results/phase3",
+  "/home/hugo_souto/Stuff/Research/sheafpatternfusion/results/phase3/shards"
+ ],
+ "files": {
+  "prevalence_scan.json": [],
+  "prevalence_scan.csv": [],
+  "scaling_probe": [],
+  "scaling_attacks": [],
+  "scaling_summary": [],
+  "cycattack_verdicts": [],
+  "cycattack_summary": [],
+  "signal_validity.json": [],
+  "signal_validity.csv": []
+ }
+}

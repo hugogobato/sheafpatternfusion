@@ -7,3 +7,11 @@
 #   parameter draws         20270901 (+ draw index)
 #   poset obstruction scans 20280901
 #   content scan battery    20290901
+# Phase 3 (WP3.0 pivot-gate probes; configs/phase3/*.json "seeds" blocks):
+#   n5 structure sampling    20400901
+#   n4 re-timing stratum     20410901
+#   n6 pilot structures      20420901
+#   parameter draws          20430901 (+ draw index)
+#   attack SRS per shard     20440901 + shard_idx
+#   prevalence bootstrap     20450901 + dataset index
+#   permutation nulls (WP3.0c) 20460901

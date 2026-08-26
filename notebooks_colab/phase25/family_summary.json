@@ -1,0 +1,6 @@
+{
+ "n_members": 120,
+ "n_witnessed_discordant": 3,
+ "success_threshold": 10,
+ "gate": "COLLAPSE"
+}

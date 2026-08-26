@@ -1,0 +1,69 @@
+{
+  "description": "WP3.0a natural-prevalence scan of cyclic missingness. Frozen 2026-08-26 before any Phase-3 run. Public datasets only (no auth-gated sources); eligibility per plan: variable subsets of size 3-6 with >= 4 realized patterns; cyclicity = Berge (frozen graham_acyclic). GO: cyclic realized pattern structure in >= 3 independent datasets OR >= 15% of eligible subsets pooled.",
+  "dataset_registry": [
+    {"name": "nhanes_2017_2018", "kind": "nhanes", "cycle": "2017-2018",
+     "files": ["DEMO_J", "BPX_J", "BMX_J", "GHB_J", "TCHOL_J", "HDL_J", "CBC_J"],
+     "merge_key": "SEQN"},
+    {"name": "nhanes_2015_2016", "kind": "nhanes", "cycle": "2015-2016",
+     "files": ["DEMO_I", "BPX_I", "BMX_I", "GHB_I", "TCHOL_I", "HDL_I", "CBC_I"],
+     "merge_key": "SEQN"},
+    {"name": "nhanes_2013_2014", "kind": "nhanes", "cycle": "2013-2014",
+     "files": ["DEMO_H", "BPX_H", "BMX_H", "GHB_H", "TCHOL_H", "HDL_H", "CBC_H"],
+     "merge_key": "SEQN"},
+    {"name": "uci_adult", "kind": "uci_zip",
+     "url": "https://archive.ics.uci.edu/static/public/2/adult.zip",
+     "members": ["adult.data"], "na_tokens": ["?"]},
+    {"name": "uci_credit_approval", "kind": "uci_zip",
+     "url": "https://archive.ics.uci.edu/static/public/27/credit+approval.zip",
+     "members": ["crx.data"], "na_tokens": ["?"]},
+    {"name": "uci_horse_colic", "kind": "uci_zip",
+     "url": "https://archive.ics.uci.edu/static/public/47/horse+colic.zip",
+     "members": ["horse-colic.data"], "na_tokens": ["?"]},
+    {"name": "uci_hepatitis", "kind": "uci_zip",
+     "url": "https://archive.ics.uci.edu/static/public/46/hepatitis.zip",
+     "members": ["hepatitis.data"], "na_tokens": ["?"]},
+    {"name": "uci_auto_imports", "kind": "uci_zip",
+     "url": "https://archive.ics.uci.edu/static/public/10/auto+imports.zip",
+     "members": ["imports-85.data"], "na_tokens": ["?"]},
+    {"name": "uci_soybean_large", "kind": "uci_zip",
+     "url": "https://archive.ics.uci.edu/static/public/90/soybean+(large).zip",
+     "members": ["soybean-large.data"], "na_tokens": ["?"]},
+    {"name": "openml_mice_protein", "kind": "openml", "name": "MiceProtein", "version": 4},
+    {"name": "openml_titanic", "kind": "openml", "name": "titanic", "version": 1}
+  ],
+  "row_cap": 30000,
+  "pool": {
+    "missing_rate_main": [0.01, 0.95],
+    "sensitivity_missing_rates": [[0.0, 0.95], [0.05, 0.95]],
+    "max_pool_vars": 24,
+    "pool_selection": "stratified by missing rate decile, then widest value-count spread; excluded vars logged"
+  },
+  "subsets": {
+    "sizes": [3, 4, 5, 6],
+    "max_per_dataset": 60000,
+    "sampling": "exhaustive if within cap else seeded SRS (seed below)",
+    "min_patterns": 4,
+    "min_support_main": 1,
+    "min_support_robustness": 5
+  },
+  "bootstrap": {
+    "target_minutes_total": 55,
+    "B_default": 200,
+    "B_max": 500,
+    "adaptive_note": "self-pilot one dataset; scale B so projected bootstrap wall lands in the target window; B capped"
+  },
+  "seeds": {
+    "subset_srs_seed_base": 20450901,
+    "bootstrap_seed_base": 20450901,
+    "permutation_control_seed_base": 20450902
+  },
+  "pre_registered_gates": {
+    "GO_datasets_with_cycles_min": 3,
+    "GO_pooled_cyclic_fraction_min": 0.15,
+    "NO_GO": "cyclic structures are artifacts of the forced generator only -> boundary-paper exit per Appendix A row 2.75"
+  },
+  "outputs": [
+    "results/phase3/prevalence_scan.csv",
+    "results/phase3/prevalence_scan.json"
+  ]
+}

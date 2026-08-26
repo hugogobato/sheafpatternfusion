@@ -1,0 +1,48 @@
+{
+  "description": "WP3.0c signal-validity probe. Frozen 2026-08-26 before any Phase-3 run. Honest test lives on attacker-labeled engine-undecided rows (fiber spread is EXCLUDED from predictors everywhere: it is the certificate's own verdict input and separates decided rows trivially). GO: AUC >= 0.75 on attacker-labeled undecided rows with permutation p < 0.01, OR downstream |rho(spread, naive-pooling error)| >= 0.30 with p < 0.01.",
+  "pools": {
+    "engine_decided_context": [
+      "data/frozen/instances_merged.jsonl (1202 decidable rows)",
+      "embedded compact cyclic stratum (1120 rows)",
+      "optional uploaded results/phase3/scaling_probe_shardXX.jsonl"
+    ],
+    "attacker_labeled_undecided_primary": [
+      "results/phase25/audit_verdicts.jsonl (899 rows, embedded compact)",
+      "optional uploaded results/phase3/cycattack_verdicts_shardXX.jsonl",
+      "optional attack records embedded in scaling shard rows"
+    ],
+    "downstream_correlation_rows": [
+      "engine-decided UNRECOVERABLE rows of the merge + cyclic stratum + discordant family (structure+seed rebuildable)"
+    ]
+  },
+  "features": [
+    "frechet_width_corrected_share_pinned",
+    "jacobian_rank_deficiency",
+    "max_cross_pattern_marginal_gap",
+    "frac_observed",
+    "overlap_density"
+  ],
+  "feature_recompute": {
+    "population": "all merge + cyclic rows lacking stored corrected widths (~4514 rows)",
+    "note": "share-pinned LP via battery.frechet_bounds on 2 workers; minutes-scale"
+  },
+  "metrics": {
+    "primary": "AUC per feature + standardized logistic combo (5-fold stratified CV) for predicting attacker-labeled UNRECOVERABLE among undecided rows",
+    "context_only_circular": "same metrics on engine-decided rows, reported but flagged as trivial separation (spread IS the verdict input there); spread itself reported only as context",
+    "null_baselines": {
+      "label_permutation_within_strata": {"strata": ["n_vars", "mechanism_class"], "B": 2000, "seed_base": 20460901},
+      "random_m_graph_matches": {"K_per_bucket": 500, "note": "features on random structures matched on n_vars bucket vs real distributions, KS statistic"}
+    },
+    "downstream": {"corr_B": 5000, "methods": ["spearman", "pearson"]}
+  },
+  "pre_registered_gates": {
+    "GO_auc_min": 0.75,
+    "GO_p_max": 0.01,
+    "GO_rho_abs_min": 0.30,
+    "NO_GO_consequence": "no sheaf-side feature clears chance once trivial separation is excluded -> correspondence track permanently closed at accessible scales; C2 characterization may still stand on WP3.0a"
+  },
+  "outputs": [
+    "results/phase3/signal_validity.csv",
+    "results/phase3/signal_validity.json"
+  ]
+}
