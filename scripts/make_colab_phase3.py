@@ -310,18 +310,23 @@ def pooled_map_deadline(worker_fn, items, n_workers=2, stall_timeout_s=5400,
 '''
 
 
-def footer_files_cell_text():
-    return """
-output_files = sorted(glob.glob(str(OUT_DIR / '*.jsonl')) +
-                      glob.glob(str(OUT_DIR / '*.json')) +
-                      glob.glob(str(OUT_DIR / '*.csv')))
-for output_file in output_files:
-    try:
-        from google.colab import files
-        files.download(output_file)
-        print('Downloaded:', output_file)
-    except Exception as e:
-        print('(Not on Colab / download skipped):', e)
+def footer_files_cell_text(zip_expr="OUT_DIR / 'phase3_outputs.zip'"):
+    return f"""
+import zipfile
+zip_path = {zip_expr}
+with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+    for pat in ['*.jsonl','*.json','*.csv']:
+        for fp in sorted(OUT_DIR.glob(pat)):
+            if fp == zip_path or fp.suffix == '.Identifier':
+                continue
+            z.write(fp, arcname=fp.name)
+print(f"Created zip {{zip_path}} ({{zip_path.stat().st_size/1024:.0f}} KB) with {{len(zipfile.ZipFile(zip_path).namelist())}} files", flush=True)
+try:
+    from google.colab import files
+    files.download(str(zip_path))
+    print('Downloaded:', zip_path)
+except Exception as e:
+    print('(Not on Colab / download skipped):', e)
 """.lstrip()
 
 
@@ -714,7 +719,7 @@ def prevalence_notebook(cfg):
         code_cell(PREVALENCE_LOADERS.splitlines(keepends=True)),
         code_cell(TOTAL_ELIGIBLE_SNIPPET.splitlines(keepends=True)),
         code_cell(PREVALENCE_RUNNER.splitlines(keepends=True)),
-        code_cell(footer_files_cell_text().splitlines(keepends=True)),
+        code_cell(footer_files_cell_text("OUT_DIR / 'prevalence_scan.zip'").splitlines(keepends=True)),
     ]
     return notebook("nb30_a_prevalence", cells)
 
@@ -994,7 +999,7 @@ def scaling_notebook(shard, n_shards, cfg):
         ]),
         code_cell(RUNNER_HELPERS.lstrip("\n").splitlines(keepends=True)),
         code_cell(SCALING_RUNNER.lstrip("\n").splitlines(keepends=True)),
-        code_cell(footer_files_cell_text().splitlines(keepends=True)),
+        code_cell(footer_files_cell_text("OUT_DIR / f'scaling_shard{SHARD_IDX:02d}.zip'").splitlines(keepends=True)),
     ]
     return notebook(f"nb30_b_scaling_shard_{shard:02d}", cells)
 
@@ -1110,7 +1115,7 @@ def cycattack_notebook(shard, n_shards, cfg, payloads):
         ]),
         code_cell(RUNNER_HELPERS.lstrip("\n").splitlines(keepends=True)),
         code_cell(CYCATTACK_RUNNER.lstrip("\n").splitlines(keepends=True)),
-        code_cell(footer_files_cell_text().splitlines(keepends=True)),
+        code_cell(footer_files_cell_text("OUT_DIR / f'cycattack_shard{SHARD_IDX:02d}.zip'").splitlines(keepends=True)),
     ]
     return notebook(f"nb30_c_cycattack_shard_{shard:02d}", cells)
 
@@ -1518,7 +1523,7 @@ def signal_notebook(cfg, payloads):
         code_cell(SIGNAL_MATCH_NULL.lstrip("\n").splitlines(keepends=True)),
         code_cell(SIGNAL_DOWNSTREAM.lstrip("\n").splitlines(keepends=True)),
         code_cell(SIGNAL_ASSEMBLE.lstrip("\n").splitlines(keepends=True)),
-        code_cell(footer_files_cell_text().splitlines(keepends=True)),
+        code_cell(footer_files_cell_text("OUT_DIR / 'signal_validity.zip'").splitlines(keepends=True)),
     ]
     return notebook("nb30_c_signal_analysis", cells)
 

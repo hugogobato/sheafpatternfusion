@@ -191,17 +191,30 @@ print("OUT_DIR:", OUT_DIR, "existing:", sorted(p.name for p in OUT_DIR.glob("*.j
 def header_md(title, wp, purpose, expected, extra=""):
     return md_cell(f"# SheafPatternFusion Phase 3 (WP3.0 pivot-gate) - {title}\n\nWork package: **{wp}**. {purpose}\n\nRuntime: CPU-only (~2 cores). Expected wall time: **{expected}**. Everything is checkpointed to JSONL and resume-safe: re-running 'Run all' continues where the session stopped.\n\nFirst run: the first cell installs the pinned numpy/scipy and HALTS with a message. Do Runtime > Restart session once (clears the preloaded binaries), then Runtime > Run all again; the install cell detects the pins and skips. The library is embedded in this notebook (generated from sheafpatternfusion source); no package install is needed." + ("\n\n"+extra if extra else ""))
 
-def footer_cell():
-    return code_cell("""
-output_files = sorted(glob.glob(str(OUT_DIR / '*.jsonl')) + glob.glob(str(OUT_DIR / '*.json')) + glob.glob(str(OUT_DIR / '*.csv')))
-for output_file in output_files:
-    try:
-        from google.colab import files
-        files.download(output_file)
-        print('Downloaded:', output_file)
-    except Exception as e:
-        print('(Not on Colab / download skipped):', e)
+def footer_cell(zip_name_expr="OUT_DIR / 'phase3b_outputs.zip'"):
+    # zip_name_expr is a Python expression evaluated in the notebook namespace
+    return code_cell(f"""
+import zipfile
+zip_path = {zip_name_expr}
+with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+    for pat in ['*.jsonl','*.json','*.csv']:
+        for fp in sorted(OUT_DIR.glob(pat)):
+            # skip the zip itself and any Zone.Identifier
+            if fp == zip_path or fp.suffix == '.Identifier':
+                continue
+            z.write(fp, arcname=fp.name)
+print(f"Created zip {{zip_path}} ({{zip_path.stat().st_size/1024:.0f}} KB) with {{len([n for n in zipfile.ZipFile(zip_path).namelist()])}} files", flush=True)
+try:
+    from google.colab import files
+    files.download(str(zip_path))
+    print('Downloaded:', zip_path)
+except Exception as e:
+    print('(Not on Colab / download skipped):', e)
 """.lstrip().splitlines(keepends=True))
+
+def footer_cell_simple():
+    # fallback for notebooks that predefine zip_path
+    return footer_cell()
 
 def main():
     OUTDIR.mkdir(parents=True, exist_ok=True)
@@ -320,7 +333,7 @@ print(f"shard {{SHARD_IDX:02d}} n5 progress now {{n5_done}}/18 structures (slice
                 code_cell(RUNNER_HELPERS.lstrip("\n").splitlines(keepends=True)),
                 code_cell(CLONE_CELL.lstrip("\n").splitlines(keepends=True)),
                 code_cell(runner.lstrip("\n").splitlines(keepends=True)),
-                footer_cell(),
+                footer_cell(f"OUT_DIR / f'scaling_resume_s{shard:02d}_p{pi}.zip'"),
             ]
             nb=notebook(f"nb30_b_resume_n5_s{shard:02d}_p{pi}", cells)
             out=OUTDIR / f"nb30_b_resume_n5_s{shard:02d}_p{pi}.ipynb"
@@ -508,7 +521,7 @@ else:
             code_cell(RUNNER_HELPERS.lstrip("\n").splitlines(keepends=True)),
             code_cell(CLONE_CELL.lstrip("\n").splitlines(keepends=True)),
             code_cell(finish_runner.lstrip("\n").splitlines(keepends=True)),
-            footer_cell(),
+            footer_cell(f"OUT_DIR / f'scaling_finish_s{shard:02d}.zip'"),
         ]
         nb=notebook(f"nb30_b_finish_shard{shard:02d}", cells)
         out=OUTDIR / f"nb30_b_finish_shard{shard:02d}.ipynb"
