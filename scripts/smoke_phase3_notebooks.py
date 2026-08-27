@@ -55,19 +55,21 @@ def run_notebook(name, tweak=None):
 
     g = __main__.__dict__
     g.setdefault("_SMOKE_DONE", set())
-    runner_src = None
+    runner_cells = []
+    started = False
     for i, src in enumerate(code_cells(name)):
-        key = (name, i)
         if "Restart session" in src or "importlib.metadata" in src:
             continue
         s = desandbox(src)
-        if s.lstrip().startswith(("T_START = time.time()",
-                                  "ds_reports = {}",
-                                  "MERGE_URL =",)):
-            runner_src = s
-            break
+        if not started and s.lstrip().startswith(("T_START = time.time()",
+                                                  "ds_reports = {}",
+                                                  "MERGE_URL =",)):
+            started = True
+        if started:
+            runner_cells.append(compile(s, f"{name}#runner{i}", "exec"))
+            continue
         exec(compile(s, f"{name}#cell{i}", "exec"), g)
-        if any(m in src for m in CFG_MARKERS) and tweak:
+        if tweak and any(m in src for m in CFG_MARKERS):
             tweak(g)
             print(f"  [{name}] tweak applied")
         if "PAYLOADS = {}" in src:
@@ -75,8 +77,8 @@ def run_notebook(name, tweak=None):
             g["FAMILY_ROWS"] = g["FAMILY_ROWS"][:3]
             print(f"  [{name}] payloads truncated")
         print(f"  [{name}] cell {i} ok", flush=True)
-    assert runner_src, f"runner cell not found in {name}"
-    return runner_src
+    assert runner_cells, f"runner cells not found in {name}"
+    return runner_cells
 
 
 # --------------------------------------------------------------------------
@@ -100,8 +102,8 @@ def smoke_scaling(shard=0):
 
     runner = run_notebook(name, tweak)
     t0 = time.time()
-    exec(compile(desandbox(runner), name + "#runner", "exec"),
-         __import__("__main__").__dict__)
+    for cell in runner:
+        exec(cell, __import__("__main__").__dict__)
     print(f"  runner ok in {time.time() - t0:.0f}s", flush=True)
     for f in sorted(SMOKE_DIR.glob("scaling_*")):
         print("  produced:", f.name)
@@ -116,9 +118,8 @@ def smoke_cycattack(shard=0):
 
     runner = run_notebook(name, tweak)
     t0 = time.time()
-    # keep the shard tiny: truncate the pending queue by pre-marking done
-    exec(compile(desandbox(runner), name + "#runner", "exec"),
-         __import__("__main__").__dict__)
+    for cell in runner:
+        exec(cell, __import__("__main__").__dict__)
     print(f"  runner ok in {time.time() - t0:.0f}s", flush=True)
 
 
@@ -127,13 +128,15 @@ def smoke_prevalence():
     print(f"== smoke {name}", flush=True)
 
     def tweak(g):
-        reg = [{"name": "synthetic_small", "kind": "synthetic"},
-               {"name": "synthetic_chainy", "kind": "synthetic"}]
-        real = [d for d in g["PREV_CFG"]["dataset_registry"]
-                if d["name"] == "uci_hepatitis"]
-        g["PREV_CFG"]["dataset_registry"] = real + reg
+        # fast real datasets exercising the corrected UCI slugs + synthetic
+        keep = {"uci_hepatitis", "uci_automobile", "uci_soybean_large"}
+        reg = [d for d in g["PREV_CFG"]["dataset_registry"] if d["name"] in keep]
+        reg += [{"name": "synthetic_small", "kind": "synthetic"},
+                {"name": "synthetic_chainy", "kind": "synthetic"}]
+        g["PREV_CFG"]["dataset_registry"] = reg
         g["PREV_CFG"]["bootstrap"]["target_minutes_total"] = 0.05
         g["PREV_CFG"]["bootstrap"]["B_max"] = 12
+        g["PREV_CFG"]["subsets"]["max_per_dataset"] = 4000
 
     runner = run_notebook(name, tweak)
     import numpy as np
@@ -144,30 +147,41 @@ def smoke_prevalence():
     def synthetic_loader(spec):
         rng = np.random.default_rng(11 if spec["name"].endswith("small") else 12)
         n, P = 800, 9
-        base = rng.random((n, P)) < 0.25
-        dep = base.copy()
-        dep[:, 1] |= base[:, 0]
+        vals = rng.random((n, P)) < 0.35
+        mask = rng.random((n, P)) < 0.25
         if spec["name"].endswith("chainy"):
             for j in range(2, P):
-                dep[:, j] = dep[:, j] | dep[:, j - 1]
+                mask[:, j] = mask[:, j] | mask[:, j - 1]
+        else:
+            # forced Berge triangle on {0,1,2}: realized observed sets
+            # {01},{12},{02} plus the empty set (4 realized patterns ->
+            # eligible, and the three pair edges form a Berge cycle)
+            MASK_TABLE = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0],
+                                   [1, 1, 1]], dtype=bool)
+            picks = rng.choice(4, size=n, p=[0.35, 0.25, 0.25, 0.15])
+            mask[:, :3] = MASK_TABLE[picks]
+            mask[:, 3:] = rng.random((n, P - 3)) < 0.25
         cols = [f"x{i}" for i in range(P)]
         df = pd.DataFrame(index=range(n), columns=cols, dtype=object)
         for j, c in enumerate(cols):
-            df[c] = [None if miss else int(val)
-                     for val, miss in zip(base[:, j], dep[:, j])]
+            df[c] = [None if m else int(v) for v, m in zip(vals[:, j], mask[:, j])]
         df["const"] = 1
         df["uid"] = range(n)
         return df
 
     M.LOADERS["synthetic"] = synthetic_loader
     t0 = time.time()
-    exec(compile(desandbox(runner), name + "#runner", "exec"), M.__dict__)
+    for cell in runner:
+        exec(cell, M.__dict__)
     print(f"  runner ok in {time.time() - t0:.0f}s", flush=True)
     summ = json.loads((SMOKE_DIR / "prevalence_scan.json").read_text())
     assert "WP3_0a_verdict" in summ
     print("  verdict:", summ["WP3_0a_verdict"],
           "| datasets_with_cycles:", len(summ["datasets_with_cycles"]),
           flush=True)
+    small = summ["reports"].get("synthetic_small", {})
+    frac = (small.get("main", {}) or {}).get("cyclic_fraction")
+    assert frac is not None and frac > 0.0, f"positive control failed: {frac}"
 
 
 def smoke_signal():
@@ -180,12 +194,13 @@ def smoke_signal():
         g["SIGNAL_CFG"]["metrics"]["null_baselines"][
             "random_m_graph_matches"]["K_per_bucket"] = 30
         g["SIGNAL_CFG"]["metrics"]["downstream"]["corr_B"] = 200
-        g["MERGE_ROWS"] = g["MERGE_ROWS"][:500]
+        if "MERGE_ROWS" in g:
+            g["MERGE_ROWS"] = g["MERGE_ROWS"][:500]
 
     runner = run_notebook(name, tweak)
     t0 = time.time()
-    exec(compile(desandbox(runner), name + "#runner", "exec"),
-         __import__("__main__").__dict__)
+    for cell in runner:
+        exec(cell, __import__("__main__").__dict__)
     print(f"  runner ok in {time.time() - t0:.0f}s", flush=True)
     sig = json.loads((SMOKE_DIR / "signal_validity.json").read_text())
     print("  mode:", sig["mode"], "| WP3.0c:", sig["WP3_0c_verdict"], flush=True)

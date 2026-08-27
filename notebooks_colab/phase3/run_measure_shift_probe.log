@@ -1,0 +1,4 @@
+measure_shift probe: 2 sizes x 50 reps x 199 perms (1992s wall)
+     n |  mmd_rbf |   energy
+   400 |    0.020 |    0.040
+  1500 |    0.020 |    0.020

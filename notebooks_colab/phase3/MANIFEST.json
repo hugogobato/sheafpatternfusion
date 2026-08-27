@@ -4,58 +4,58 @@
  "generated": "2026-08-26",
  "notebooks": {
   "nb30_a_prevalence.ipynb": {
-   "size_kb": 173
+   "size_kb": 174
   },
   "nb30_b_scaling_shard_00.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_01.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_02.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_03.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_04.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_05.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_06.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_07.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_08.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_09.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_10.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_b_scaling_shard_11.ipynb": {
-   "size_kb": 177
+   "size_kb": 178
   },
   "nb30_c_cycattack_shard_00.ipynb": {
-   "size_kb": 298
+   "size_kb": 299
   },
   "nb30_c_cycattack_shard_01.ipynb": {
-   "size_kb": 298
+   "size_kb": 299
   },
   "nb30_c_cycattack_shard_02.ipynb": {
-   "size_kb": 298
+   "size_kb": 299
   },
   "nb30_c_cycattack_shard_03.ipynb": {
-   "size_kb": 298
+   "size_kb": 299
   },
   "nb30_c_signal_analysis.ipynb": {
-   "size_kb": 313
+   "size_kb": 314
   }
  },
  "expected_outputs": {

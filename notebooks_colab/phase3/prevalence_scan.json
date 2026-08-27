@@ -1,0 +1,314 @@
+{
+ "config": "configs/phase3/prevalence.json (frozen 2026-08-26)",
+ "datasets_loaded": 3,
+ "datasets_failed": 8,
+ "datasets_with_cycles": [],
+ "n_datasets_with_cycles": 0,
+ "pooled_eligible": 61174,
+ "pooled_cyclic": 0,
+ "pooled_cyclic_fraction": 0.0,
+ "gate_GO_datasets": false,
+ "gate_GO_fraction": false,
+ "WP3_0a_verdict": "NO-GO",
+ "reports": {
+  "uci_adult": {
+   "status": "analysis_failed",
+   "error": "ValueError: parsed frame looks non-tabular (HTML block page?) html-cells=22782"
+  },
+  "uci_credit_approval": {
+   "status": "analysis_failed",
+   "error": "ValueError: no candidate columns in [0.05,0.95]; missing-rate histogram [11, 5, 0, 0, 0], n_cols=16"
+  },
+  "uci_horse_colic": {
+   "status": "analysis_failed",
+   "error": "ValueError: no candidate columns in [0.01,0.95]; missing-rate histogram [1, 0, 0, 0, 0], n_cols=1"
+  },
+  "uci_hepatitis": {
+   "status": "ok",
+   "diag": {
+    "rows_raw": 155,
+    "cols_raw": 20,
+    "rows_used": 155,
+    "fully_observed_cols": 5,
+    "pool_size": 11,
+    "missing_rate_range": [
+     0.06451612903225806,
+     0.432258064516129
+    ]
+   },
+   "main": {
+    "subsets_scanned": 1419,
+    "eligible": 1414,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 161,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 329,
+      "cyclic": 0
+     },
+     "5": {
+      "eligible": 462,
+      "cyclic": 0
+     },
+     "6": {
+      "eligible": 462,
+      "cyclic": 0
+     }
+    }
+   },
+   "robust_min_support": {
+    "subsets_scanned": 1419,
+    "eligible": 258,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 16,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 49,
+      "cyclic": 0
+     },
+     "5": {
+      "eligible": 88,
+      "cyclic": 0
+     },
+     "6": {
+      "eligible": 105,
+      "cyclic": 0
+     }
+    }
+   },
+   "permutation_control": {
+    "subsets_scanned": 1419,
+    "eligible": 1419,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 165,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 330,
+      "cyclic": 0
+     },
+     "5": {
+      "eligible": 462,
+      "cyclic": 0
+     },
+     "6": {
+      "eligible": 462,
+      "cyclic": 0
+     }
+    }
+   },
+   "sensitivity_missing_window": {
+    "sens_0.0_0.95": 0.0,
+    "sens_0.05_0.95": 0.0
+   },
+   "bootstrap": {
+    "B": 500,
+    "fraction_q05": 0.0,
+    "fraction_median": 0.0,
+    "fraction_q95": 0.0
+   },
+   "wall_s": 98.2
+  },
+  "uci_automobile": {
+   "status": "ok",
+   "diag": {
+    "rows_raw": 205,
+    "cols_raw": 26,
+    "rows_used": 205,
+    "fully_observed_cols": 19,
+    "pool_size": 4,
+    "missing_rate_range": [
+     0.2,
+     0.2
+    ]
+   },
+   "main": {
+    "subsets_scanned": 5,
+    "eligible": 3,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 2,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 1,
+      "cyclic": 0
+     }
+    }
+   },
+   "robust_min_support": {
+    "subsets_scanned": 5,
+    "eligible": 0,
+    "cyclic": 0,
+    "cyclic_fraction": null,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {}
+   },
+   "permutation_control": {
+    "subsets_scanned": 5,
+    "eligible": 5,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 4,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 1,
+      "cyclic": 0
+     }
+    }
+   },
+   "sensitivity_missing_window": {
+    "sens_0.0_0.95": 0.0,
+    "sens_0.05_0.95": null
+   },
+   "bootstrap": {
+    "B": 500,
+    "fraction_q05": 0.0,
+    "fraction_median": 0.0,
+    "fraction_q95": 0.0
+   },
+   "wall_s": 2.6
+  },
+  "uci_soybean_large": {
+   "status": "ok",
+   "diag": {
+    "rows_raw": 307,
+    "cols_raw": 36,
+    "rows_used": 307,
+    "fully_observed_cols": 2,
+    "pool_size": 24,
+    "missing_rate_range": [
+     0.08143322475570032,
+     0.13355048859934854
+    ]
+   },
+   "main": {
+    "subsets_scanned": 60000,
+    "eligible": 59757,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 537,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 3420,
+      "cyclic": 0
+     },
+     "5": {
+      "eligible": 13378,
+      "cyclic": 0
+     },
+     "6": {
+      "eligible": 42422,
+      "cyclic": 0
+     }
+    }
+   },
+   "robust_min_support": {
+    "subsets_scanned": 60000,
+    "eligible": 57183,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 438,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 2992,
+      "cyclic": 0
+     },
+     "5": {
+      "eligible": 12551,
+      "cyclic": 0
+     },
+     "6": {
+      "eligible": 41202,
+      "cyclic": 0
+     }
+    }
+   },
+   "permutation_control": {
+    "subsets_scanned": 60000,
+    "eligible": 60000,
+    "cyclic": 0,
+    "cyclic_fraction": 0.0,
+    "partial_overlap_among_cyclic": null,
+    "by_size": {
+     "3": {
+      "eligible": 621,
+      "cyclic": 0
+     },
+     "4": {
+      "eligible": 3507,
+      "cyclic": 0
+     },
+     "5": {
+      "eligible": 13432,
+      "cyclic": 0
+     },
+     "6": {
+      "eligible": 42440,
+      "cyclic": 0
+     }
+    }
+   },
+   "sensitivity_missing_window": {
+    "sens_0.0_0.95": 0.0,
+    "sens_0.05_0.95": 0.0
+   },
+   "bootstrap": {
+    "B": 500,
+    "fraction_q05": 0.0,
+    "fraction_median": 0.0,
+    "fraction_q95": 0.0
+   },
+   "wall_s": 2356.8
+  },
+  "openml_MiceProtein": {
+   "status": "load_failed",
+   "error": "InvalidParameterError: The 'version' parameter of fetch_openml must be an int in the range [1, inf) or a str among {'active'}. Got None instead."
+  },
+  "openml_titanic": {
+   "status": "load_failed",
+   "error": "InvalidParameterError: The 'version' parameter of fetch_openml must be an int in the range [1, inf) or a str among {'active'}. Got None instead."
+  },
+  "openml_colic": {
+   "status": "load_failed",
+   "error": "InvalidParameterError: The 'version' parameter of fetch_openml must be an int in the range [1, inf) or a str among {'active'}. Got None instead."
+  },
+  "openml_cylinder-bands": {
+   "status": "load_failed",
+   "error": "InvalidParameterError: The 'version' parameter of fetch_openml must be an int in the range [1, inf) or a str among {'active'}. Got None instead."
+  },
+  "openml_arrhythmia": {
+   "status": "load_failed",
+   "error": "InvalidParameterError: The 'version' parameter of fetch_openml must be an int in the range [1, inf) or a str among {'active'}. Got None instead."
+  }
+ }
+}

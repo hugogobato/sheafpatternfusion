@@ -218,7 +218,8 @@ def pooled_map_deadline(worker_fn, items, n_workers=2, stall_timeout_s=5400,
     """Yield worker_fn(item) for all items on a fork-context pool with about
     2*n_workers futures in flight. Stops dispatching once seconds_budget is
     exhausted (running jobs drain; queued ones are cancelled and reported in
-    meta['not_run']); falls back to sequential execution on pool failure."""
+    meta['not_run']); falls back to sequential execution on pool failure.
+    Job dicts may carry EITHER 'iid' or 'instance_id' as their key."""
     from concurrent.futures import ProcessPoolExecutor, FIRST_COMPLETED, wait
 
     items = list(items)
@@ -227,21 +228,26 @@ def pooled_map_deadline(worker_fn, items, n_workers=2, stall_timeout_s=5400,
     meta['not_run'] = []
     meta['timed_out'] = False
     meta['completed'] = 0
-    meta['done_iids'] = set()
+    meta['done_keys'] = set()
     t_start = time.time()
 
     def left():
         return None if seconds_budget is None else seconds_budget - (time.time() - t_start)
 
+    def jkey(it):
+        if isinstance(it, dict):
+            return it.get('iid') or it.get('instance_id') or id(it)
+        return str(it)
+
     if len(items) <= 1 or n_workers <= 1:
         for it in items:
             if left() is not None and left() <= 0:
                 meta['timed_out'] = True
-                meta['not_run'] = [x['iid'] for x in items[items.index(it):]]
+                meta['not_run'] = [jkey(x) for x in items[items.index(it):]]
                 return
             r = worker_fn(it)
             meta['completed'] += 1
-            meta['done_iids'].add(it['iid'])
+            meta['done_keys'].add(jkey(it))
             yield r
         return
 
@@ -253,34 +259,36 @@ def pooled_map_deadline(worker_fn, items, n_workers=2, stall_timeout_s=5400,
         while True:
             while nxt < len(items) and len(fut_item) < 2 * n_workers:
                 if left() is not None and left() <= 0:
+                    meta['timed_out'] = True
                     break
                 f = ex.submit(worker_fn, items[nxt])
                 fut_item[f] = items[nxt]
                 nxt += 1
-            if left() is not None and left() <= 0 and nxt < len(items):
-                meta['timed_out'] = True
-                meta['not_run'].extend(x['iid'] for x in items[nxt:])
+            if meta['timed_out']:
+                meta['not_run'].extend(jkey(x) for x in items[nxt:])
                 nxt = len(items)
-            still = {}
-            for f, it in fut_item.items():
-                if not f.cancel():
-                    still[f] = it
-                else:
-                    meta['not_run'].append(it['iid'])
-            fut_item = still
-            if not fut_item:
+            if fut_item:
+                done_set, _ = wait(set(fut_item), timeout=stall_timeout_s,
+                                   return_when=FIRST_COMPLETED)
+                if not done_set:
+                    raise RuntimeError(
+                        f'pool stalled {stall_timeout_s}s with '
+                        f'{len(fut_item)} futures pending')
+                for f in done_set:
+                    it = fut_item.pop(f)
+                    meta['completed'] += 1
+                    meta['done_keys'].add(jkey(it))
+                    yield f.result()
+            if nxt >= len(items) and not fut_item:
                 break
-            done_set, _ = wait(set(fut_item), timeout=stall_timeout_s,
-                               return_when=FIRST_COMPLETED)
-            if not done_set:
-                raise RuntimeError(
-                    f'pool stalled {stall_timeout_s}s with '
-                    f'{len(fut_item)} futures pending')
-            for f in done_set:
-                it = fut_item.pop(f)
-                meta['completed'] += 1
-                meta['done_iids'].add(it['iid'])
-                yield f.result()
+            if meta['timed_out']:
+                still = {}
+                for f, it in fut_item.items():
+                    if not f.cancel():
+                        still[f] = it
+                    else:
+                        meta['not_run'].append(jkey(it))
+                fut_item = still
         ex.shutdown(wait=False, cancel_futures=True)
     except Exception as e:
         print(f'(pool yielded {meta["completed"]}/{len(items)} then '
@@ -293,11 +301,11 @@ def pooled_map_deadline(worker_fn, items, n_workers=2, stall_timeout_s=5400,
                 pass
         ex.shutdown(wait=False, cancel_futures=True)
         for it in items:
-            if it['iid'] in meta['done_iids']:
+            if jkey(it) in meta['done_keys']:
                 continue
             r = worker_fn(it)
             meta['completed'] += 1
-            meta['done_iids'].add(it['iid'])
+            meta['done_keys'].add(jkey(it))
             yield r
 '''
 
@@ -422,23 +430,6 @@ def payload_cell(payloads):
 # --------------------------------------------------------------------------
 
 PREVALENCE_LOADERS = '''
-NH_BASE = "https://wwwn.cdc.gov/Nchs/Nhanes/{cycle}/{file}.XPT"
-
-
-def load_nhanes(spec):
-    frames = []
-    for fname in spec["files"]:
-        url = NH_BASE.format(cycle=spec["cycle"], file=fname)
-        raw = urllib.request.urlopen(url, timeout=120).read()
-        frames.append(pd.read_sas(io.BytesIO(raw), format="xport"))
-    merged = None
-    for df in frames:
-        df = df.drop_duplicates(subset=[spec["merge_key"]])
-        merged = df if merged is None else pd.merge(
-            merged, df, on=spec["merge_key"], how="outer")
-    return merged
-
-
 def load_uci_zip(spec):
     raw = urllib.request.urlopen(spec["url"], timeout=180).read()
     zf = zipfile.ZipFile(io.BytesIO(raw))
@@ -471,8 +462,7 @@ def load_openml_ds(spec):
     return X
 
 
-LOADERS = {"nhanes": load_nhanes, "uci_zip": load_uci_zip,
-           "openml": load_openml_ds}
+LOADERS = {"uci_zip": load_uci_zip, "openml": load_openml_ds}
 
 
 ID_TOKENS = ("id", "seqn", "seq", "caseid", "psu", "strata", "weight",
@@ -489,6 +479,13 @@ def prepare_dataset(df, spec, PREV_CFG):
     diag["rows_used"] = int(len(df))
 
     df = df.replace(["?", "", "NA", "nan", "None", -999, -9999], np.nan)
+    if len(df) < 10:
+        raise ValueError(f"frame too small ({len(df)} rows) -- non-tabular payload?")
+    _htmly = float(df.astype(str).apply(
+        lambda c: c.str.contains("<", na=False)).sum().sum())
+    if _htmly > max(5, 0.05 * df.size):
+        raise ValueError(f"parsed frame looks non-tabular (HTML block page?) "
+                         f"html-cells={int(_htmly)}")
     nunique = df.nunique(dropna=True)
     keep = [c for c in df.columns if nunique.get(c, 0) > 1]
     keep = [c for c in keep
@@ -502,6 +499,11 @@ def prepare_dataset(df, spec, PREV_CFG):
             [(f"sens_{lo}_{hi}", (lo, hi))
              for lo, hi in PREV_CFG["pool"]["sensitivity_missing_rates"]]:
         cand = [c for c in df.columns if lo <= mf[c] <= hi]
+        if not cand:
+            hist = np.histogram(mf, bins=[0, 0.01, 0.05, 0.5, 0.95, 1.01])[0]
+            raise ValueError(f"no candidate columns in [{lo},{hi}]; "
+                             f"missing-rate histogram {hist.tolist()}, "
+                             f"n_cols={len(df.columns)}")
         cand = sorted(cand, key=lambda c: (mf[c], str(c)))
         excluded = 0
         if len(cand) > int(PREV_CFG["pool"]["max_pool_vars"]):
@@ -554,7 +556,7 @@ ds_reports = {}
 csv_rows = []
 loaded = failed = 0
 for di, spec in enumerate(PREV_CFG["dataset_registry"]):
-    name = spec["name"]
+    name = spec.get("label") or spec["name"]
     t0 = time.time()
     print(f"=== dataset {di + 1}/{len(PREV_CFG['dataset_registry'])}: {name} ===",
           flush=True)
@@ -653,7 +655,7 @@ with open(OUT_DIR / "prevalence_scan.csv", "w", newline="") as f:
         w.writeheader()
         w.writerows(csv_rows)
 
-ok = {k: v for k, v in ds_reports.values() if v.get("status") == "ok"}
+ok = {k: v for k, v in ds_reports.items() if v.get("status") == "ok"}
 datasets_with_cycles = [k for k, v in ok.items()
                         if (v["main"]["cyclic_fraction"] or 0) > 0]
 elig_pool = sum(v["main"]["eligible"] for v in ok.values())
@@ -1192,7 +1194,7 @@ if pending:
     meta = {}
     fout = open(FEAT_PATH, "a")
     for rec in pooled_map_deadline(feature_only, pending, n_workers=2, meta=meta):
-        fout.write(dump_line(rec) + "\n")
+        fout.write(dump_line(rec) + "\\n")
     fout.close()
 FEATS = {r["key"]: r for r in map(json.loads, open(FEAT_PATH))}
 print("features ready:", len(FEATS))

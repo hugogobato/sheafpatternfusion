@@ -550,6 +550,8 @@ def spread_naive_table(rows: list[dict]) -> list[dict]:
     error against the true estimand."""
     from .lp_ground_truth import target_value_phi
 
+    from .battery import frechet_bounds
+
     out = []
     for row in rows:
         try:
@@ -558,12 +560,19 @@ def spread_naive_table(rows: list[dict]) -> list[dict]:
             j = int(row["target"][1])
             phi_true = target_value_phi(m, tuple(row["target"]))
             est = naive_pooling_mean(m, j)
+            fwidth = row.get("frechet_width")
+            if fwidth is None:
+                try:
+                    fb = frechet_bounds(inst.n_vars, q, pp, tuple(row["target"]))
+                    fwidth = fb["width"]
+                except Exception:
+                    fwidth = None
             out.append({
                 "instance_id": row.get("instance_id"),
                 "source": row.get("source_tag", "unspecified"),
                 "spread": float(row.get("phi_spread_over_fiber", 0.0) or 0.0),
                 "naive_abs_err": abs(est - phi_true),
-                "frechet_width": row.get("frechet_width"),
+                "frechet_width": fwidth,
                 "max_gap": row.get("max_cross_pattern_marginal_gap"),
             })
         except Exception:
@@ -651,6 +660,9 @@ def permutation_corr_p(x, y, B: int, seed: int, method: str = "spearman") -> dic
             return 0.0
         return float(np.corrcoef(a, b)[0, 1])
 
+    if len(x) < 3 or not np.isfinite(x).all() or not np.isfinite(y).all():
+        return {"rho": None, "p_two_sided": None, "B": B, "method": method,
+                "n": int(len(x)), "reason": "insufficient finite pairs"}
     rho = corr(x, y)
     ge = 0
     for _ in range(B):

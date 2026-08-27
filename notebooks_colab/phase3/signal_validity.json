@@ -1,0 +1,146 @@
+{
+ "mode": "PARTIAL_existing_assets_only",
+ "primary_auc": {
+  "pool": "P2_attacker_labeled_undecided_PRIMARY",
+  "n": 899,
+  "positives": 0,
+  "note": "single-class pool: AUC undefined (recorded honestly)",
+  "frechet_width": {
+   "auc": null,
+   "p_value": null
+  },
+  "jacobian_rank_deficiency": {
+   "auc": null,
+   "p_value": null
+  },
+  "max_cross_pattern_marginal_gap": {
+   "auc": null,
+   "p_value": null
+  },
+  "frac_observed": {
+   "auc": null,
+   "p_value": null
+  },
+  "overlap_density": {
+   "auc": null,
+   "p_value": null
+  }
+ },
+ "context_circular": {
+  "pool": "P1_engine_decided_CONTEXT_CIRCULAR",
+  "n": 1538,
+  "positives": 673,
+  "frechet_width": {
+   "auc": 0.5241683772943168,
+   "p_value": 0.0499001996007984,
+   "B": 500,
+   "null_mean": 0.500971197897431,
+   "null_sd": 0.013320174218220545
+  },
+  "jacobian_rank_deficiency": {
+   "auc": 0.859912908296043,
+   "p_value": 0.001996007984031936,
+   "B": 500,
+   "null_mean": 0.5235697790069485,
+   "null_sd": 0.012706368516138562
+  },
+  "max_cross_pattern_marginal_gap": {
+   "auc": 0.6861056953164589,
+   "p_value": 0.001996007984031936,
+   "B": 500,
+   "null_mean": 0.5747762722345808,
+   "null_sd": 0.01207904772823343
+  },
+  "frac_observed": {
+   "auc": 0.4820671825747881,
+   "p_value": 0.9580838323353293,
+   "B": 500,
+   "null_mean": 0.5052821204339125,
+   "null_sd": 0.013014561683275834
+  },
+  "overlap_density": {
+   "auc": 0.27345077257384326,
+   "p_value": 1.0,
+   "B": 500,
+   "null_mean": 0.4146773157890216,
+   "null_sd": 0.006578585183743979
+  },
+  "logistic_combo_cv_auc_mean": 0.9280932524276497,
+  "logistic_combo_cv_auc_sd": 0.01901155787789986
+ },
+ "random_m_graph_match_null": {
+  "n3": {
+   "frechet_width": {
+    "ks_stat": 0.11075255788906839,
+    "p_value": 0.0005644897314603433,
+    "n_match": 400,
+    "n_real": 1857
+   },
+   "frac_observed": {
+    "ks_stat": 0.04547657512116317,
+    "p_value": 0.48773596580035594,
+    "n_match": 400,
+    "n_real": 1857
+   },
+   "overlap_density": {
+    "ks_stat": 0.18093699515347333,
+    "p_value": 6.732746054042901e-10,
+    "n_match": 400,
+    "n_real": 1857
+   }
+  },
+  "n4": {
+   "frechet_width": {
+    "ks_stat": 0.04579145728643216,
+    "p_value": 0.7733633492511383,
+    "n_match": 400,
+    "n_real": 398
+   },
+   "frac_observed": {
+    "ks_stat": 0.07061557788944724,
+    "p_value": 0.25612258505784674,
+    "n_match": 400,
+    "n_real": 398
+   },
+   "overlap_density": {
+    "ks_stat": 0.0,
+    "p_value": 1.0,
+    "n_match": 400,
+    "n_real": 398
+   }
+  },
+  "n5": {}
+ },
+ "downstream_correlation": {
+  "spearman": {
+   "rho": 0.37097398685332783,
+   "p_two_sided": 0.0001999600079984003,
+   "B": 5000,
+   "method": "spearman",
+   "n": 793
+  },
+  "pearson": {
+   "rho": 0.33643187304059347,
+   "p_two_sided": 0.0001999600079984003,
+   "B": 5000,
+   "method": "pearson",
+   "n": 793
+  },
+  "frechet_vs_naive_err_spearman": {
+   "rho": 0.20566468121904383,
+   "p_two_sided": 0.0001999600079984003,
+   "B": 5000,
+   "method": "spearman",
+   "n": 793
+  }
+ },
+ "arm_auc_GO": null,
+ "arm_rho_GO": true,
+ "WP3_0c_verdict": "GO",
+ "gates": {
+  "GO_auc_min": 0.75,
+  "GO_p_max": 0.01,
+  "GO_rho_abs_min": 0.3,
+  "NO_GO_consequence": "no sheaf-side feature clears chance once trivial separation is excluded -> correspondence track permanently closed at accessible scales; C2 characterization may still stand on WP3.0a"
+ }
+}
