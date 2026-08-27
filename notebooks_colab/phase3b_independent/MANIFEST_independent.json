@@ -1,0 +1,16 @@
+{
+  "generated": "2026-08-27",
+  "fleet": "phase3b_independent (fully independent slices, hardcoded jobs, slice-specific outputs)",
+  "total_missing_n5_structures": 108,
+  "resume_notebooks": 33,
+  "finish_notebooks": 12,
+  "total_notebooks": 45,
+  "per_notebook_wall_guarantee": "<4 h (resume 0.9-1.5 h median worst 3.4 h, finish <1 h)",
+  "outputs": [
+    "/content/results/phase3/scaling_resume_sXX_pY.jsonl (slice engine rows, primary)",
+    "/content/results/phase3/scaling_probe_shardXX.jsonl (mirrored append)",
+    "/content/results/phase3/scaling_attacks_shardXX.jsonl",
+    "/content/results/phase3/scaling_summary_shardXX.json"
+  ],
+  "usage": "1) Run all resume slices (33, parallel, independent). 2) After each shard's n5 hits 18/18 (check finish notebook's first line), run its finish notebook. 3) Download all *.jsonl/*.json into notebooks_colab/phase3/incoming/ and run python3 scripts/collect_phase3_remaining.py or python3 scripts/run_phase3.py --stage collect."
+}
